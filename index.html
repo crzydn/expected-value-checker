@@ -3,54 +3,70 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>トレカ期待値チェッカー β</title>
-<meta name="description" content="遊戯王・ポケカ・ヴァイスなどのトレカボックス期待値ランキング。平均買取・回収率を自動で比較。">
-<meta property="og:title" content="トレカ期待値チェッカー β">
-<meta property="og:description" content="遊戯王・ポケカ・ヴァイス・デュエマ対応の期待値比較ツール">
-<meta property="og:type" content="website">
+<title>トレカ期待値チェッカー β｜遊戯王・ポケカ・ヴァイス対応</title>
+<meta name="description" content="遊戯王・ポケカ・ヴァイスなど主要トレカのボックス期待値を自動集計。買取価格から回収率・期待値を計算できます。">
+<meta name="keywords" content="遊戯王,ポケカ,トレカ,期待値,ボックス,買取,回収率,相場,カードラッシュ,メルカリ">
 <meta name="robots" content="index,follow">
+<meta name="geo.region" content="JP">
+<meta name="geo.placename" content="Japan">
+<meta name="author" content="トレカ期待値チェッカーβ公式">
+<meta property="og:title" content="トレカ期待値チェッカー β｜主要トレカ期待値ランキング">
+<meta property="og:description" content="遊戯王・ポケカ・ヴァイスなどの期待値比較サイト。ROI・パックEV自動計算。">
+<meta property="og:type" content="website">
+<meta property="og:image" content="assets/ogp.jpg">
+<link rel="icon" href="assets/favicon.ico">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.tailwindcss.min.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
-<body class="bg-gray-50 text-gray-900">
-  <header class="text-center py-6 border-b border-gray-300 bg-white shadow-sm">
-    <h1 class="text-3xl font-bold text-yellow-600">トレカ期待値チェッカー β</h1>
-    <p class="text-sm text-gray-600 mt-1">遊戯王・ポケカ・ヴァイス・デュエマ対応</p>
-  </header>
+<body class="bg-gray-50 text-gray-900 font-sans">
+<header class="text-center py-6 border-b border-gray-200 bg-white shadow-sm">
+  <h1 class="text-3xl font-bold text-yellow-600">トレカ期待値チェッカー β</h1>
+  <p class="text-sm text-gray-600 mt-1">遊戯王・ポケカ・ヴァイス・デュエマ対応</p>
+</header>
 
-  <main class="max-w-7xl mx-auto px-4 py-8">
-    <section id="ranking" class="mb-12">
-      <h2 class="text-2xl font-semibold mb-3">📊 最新ランキング</h2>
-      <table id="torekaTable" class="stripe hover w-full text-sm"></table>
-      <p class="text-xs text-gray-500 mt-2">※PRを含みます。データは参考値であり、投資助言を目的としません。</p>
-    </section>
+<main class="max-w-7xl mx-auto px-4 py-8">
+  <!-- ランキング -->
+  <section id="ranking" class="mb-12">
+    <h2 class="text-2xl font-semibold mb-3">📊 最新期待値ランキング</h2>
+    <table id="torekaTable" class="stripe hover w-full text-sm bg-white rounded shadow"></table>
+    <p class="text-xs text-gray-500 mt-2">※広告を含みます。データは参考値であり、投資助言を目的としません。</p>
+  </section>
 
-    <section id="calc" class="bg-white rounded-xl shadow p-6">
-      <h2 class="text-xl font-semibold mb-2">🧮 自分で計算してみる</h2>
-      <form id="calcForm" class="grid grid-cols-2 gap-4">
-        <label>パック単価 <input type="number" id="packPrice" class="border p-2 w-full" value="200"></label>
-        <label>パック数 <input type="number" id="packCount" class="border p-2 w-full" value="30"></label>
-        <label>レア1 平均買取 <input type="number" id="r1avg" class="border p-2 w-full" value="900"></label>
-        <label>レア1 封入数 <input type="number" id="r1cpb" class="border p-2 w-full" value="3"></label>
-        <label>レア2 平均買取 <input type="number" id="r2avg" class="border p-2 w-full" value="450"></label>
-        <label>レア2 封入数 <input type="number" id="r2cpb" class="border p-2 w-full" value="6"></label>
-      </form>
-      <button id="calcBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded mt-4">計算する</button>
-      <div id="calcResult" class="mt-4 text-lg font-semibold"></div>
-    </section>
-  </main>
+  <!-- 自分で計算 -->
+  <section id="calc" class="bg-white rounded-xl shadow p-6 mb-12">
+    <h2 class="text-xl font-semibold mb-3">🧮 自分で計算してみる</h2>
+    <form id="calcForm" class="grid grid-cols-2 gap-4">
+      <label>パック単価 <input type="number" id="packPrice" class="border p-2 w-full" value="200"></label>
+      <label>パック数 <input type="number" id="packCount" class="border p-2 w-full" value="30"></label>
+      <label>レア1 平均買取 <input type="number" id="r1avg" class="border p-2 w-full" value="900"></label>
+      <label>レア1 封入数 <input type="number" id="r1cpb" class="border p-2 w-full" value="3"></label>
+      <label>レア2 平均買取 <input type="number" id="r2avg" class="border p-2 w-full" value="450"></label>
+      <label>レア2 封入数 <input type="number" id="r2cpb" class="border p-2 w-full" value="6"></label>
+    </form>
+    <button id="calcBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded mt-4">計算する</button>
+    <div id="calcResult" class="mt-4 text-lg font-semibold text-center"></div>
+  </section>
 
-  <footer class="text-center text-gray-600 text-sm py-6 border-t border-gray-200 bg-gray-100">
-    <p>© 2025 トレカ期待値チェッカー β | 参考データ：CardRush / yugioh-starter.com</p>
-  </footer>
+  <!-- FAQ -->
+  <section id="faq" class="bg-gray-100 rounded-xl shadow p-6">
+    <h2 class="text-xl font-semibold mb-3">❓ よくある質問</h2>
+    <details class="mb-2"><summary class="cursor-pointer font-medium">Q. データはどこから取得していますか？</summary><p class="ml-4 mt-1 text-sm text-gray-700">主にカードラッシュ、トレコロ、メルカリの公開買取価格を参考に独自集計しています。</p></details>
+    <details class="mb-2"><summary class="cursor-pointer font-medium">Q. データが古い場合は？</summary><p class="ml-4 mt-1 text-sm text-gray-700">定期的に更新を行っていますが、価格変動により実際の買取価格と異なる場合があります。</p></details>
+    <details class="mb-2"><summary class="cursor-pointer font-medium">Q. 期待値は投資判断に使えますか？</summary><p class="ml-4 mt-1 text-sm text-gray-700">本サイトは投資助言を目的としていません。購入判断は自己責任でお願いいたします。</p></details>
+  </section>
+</main>
 
-<script src="js/main.js">
-  // js/main.js
+<footer class="text-center text-gray-600 text-sm py-6 border-t border-gray-200 bg-white mt-12">
+  <p>© 2025 トレカ期待値チェッカー β | データ参考: CardRush / yugioh-starter.com / Mercari</p>
+  <p class="text-xs mt-2">Google Analytics & Clarityによる解析を利用。プライバシーポリシーに同意の上ご利用ください。</p>
+</footer>
+
+<script>
 $(document).ready(function () {
   fetch("data/torekadata.json")
     .then((r) => r.json())
@@ -62,15 +78,15 @@ $(document).ready(function () {
       { title: "ゲーム", data: "game" },
       { title: "ボックス名", data: "boxName" },
       { title: "発売日", data: "releaseDate" },
-      { title: "箱価格", data: "boxPrice" },
-      { title: "期待値(合計)", data: "avgBuyTotal" },
+      { title: "箱価格(円)", data: "boxPrice" },
+      { title: "期待値(円)", data: "avgBuyTotal" },
       { title: "1パックEV", data: "packEV" },
       { title: "回収率", data: "roi_pct" },
       {
-        title: "アフィリンク",
+        title: "リンク",
         data: "affiliateUrl",
         render: function (url, type, row) {
-          return `<a href="${url}" target="_blank" class="text-yellow-600 underline">見る</a>`;
+          return url ? `<a href="${url}" target="_blank" class="text-yellow-600 underline">見る</a>` : "-";
         },
       },
     ];
@@ -81,6 +97,7 @@ $(document).ready(function () {
       order: [[6, "desc"]],
       pageLength: 10,
       responsive: true,
+      language: { url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/ja.json" },
     });
   }
 
@@ -97,10 +114,9 @@ $(document).ready(function () {
     const packEV = (avgBuyTotal / packCount).toFixed(0);
     const roi = (avgBuyTotal / boxPrice).toFixed(2);
     const roiPct = (roi * 100).toFixed(1) + "%";
-    $("#calcResult").html(`箱価格：${boxPrice}円 ／ 期待値：${avgBuyTotal}円 ／ ROI：${roiPct}`);
+    $("#calcResult").html(`箱価格：${boxPrice.toLocaleString()}円 ／ 期待値：${avgBuyTotal.toLocaleString()}円 ／ ROI：${roiPct}`);
   });
 });
-
 </script>
 </body>
 </html>

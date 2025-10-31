@@ -1,655 +1,106 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>遊戯王ボックス期待値チェッカー（β/ライトダーク）</title>
-  <meta name="description" content="遊戯王OCGボックスの期待値（買取額ベース）を、やや暗めライトUIで簡単算出。スマホ最適化＆アフィ・AdSense連携。" />
-  <style>
-    :root {
-      /* 少し暗めのライト基調（変えたい場合はここを調整） */
-      --bg: #e9edf3;          /* 明るい灰青 */
-      --card: #ffffff;        /* 白カード */
-      --ink: #0e1525;         /* 濃いインク */
-      --muted: #4b5563;       /* ミドルテキスト */
-      --line: #d7deea;        /* 罫線 */
-      --accent: #0ea5e9;      /* 空色 */
-      --accent-2: #22c55e;    /* 緑 */
-      --accent-3: #f59e0b;    /* 黄 */
-      --bad: #ef4444;         /* 赤 */
-      --ok: #22c55e;          /* 緑 */
-    }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 system-ui, -apple-system, Segoe UI, Roboto, "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", "Meiryo", sans-serif; }
-
-    header { position: sticky; top: 0; z-index: 60; background: rgba(255,255,255,.92); backdrop-filter: saturate(140%) blur(8px); border-bottom: 1px solid var(--line); }
-    .wrap { max-width: 1100px; margin: 0 auto; padding: 14px 16px; }
-
-    .brand { display: flex; gap: 12px; align-items: center; }
-    .logo { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #60a5fa, #38bdf8); display: grid; place-items: center; font-weight: 800; color: #082f49; }
-    .logo span { font-size: 18px; }
-    .title { font-weight: 800; letter-spacing: .02em; }
-    .sub { color: var(--muted); font-size: 13px; }
-
-    main.wrap { display: grid; grid-template-columns: 1.15fr .85fr; gap: 16px; align-items: start; }
-    @media (max-width: 980px) { main.wrap { grid-template-columns: 1fr; } }
-
-    .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; box-shadow: 0 6px 14px rgba(2,6,23,.06); }
-    .card h2 { margin: 0 0 10px; font-size: 18px; letter-spacing: .02em; }
-    .hint { color: var(--muted); font-size: 13px; }
-
-    label { display: block; font-weight: 700; margin: 10px 0 6px; }
-    input[type="text"], input[type="number"], textarea { width: 100%; padding: 12px 12px; border-radius: 12px; border: 1px solid var(--line); background: #f8fafc; color: var(--ink); outline: none; }
-    input[type="text"]:focus, input[type="number"]:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(14,165,233,.15); }
-    input[type="number"]::-webkit-outer-spin-button,
-    input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-
-    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .row3 { display: grid; grid-template-columns: 1.2fr .8fr .8fr; gap: 10px; }
-    .row4 { display: grid; grid-template-columns: 1fr .8fr .8fr .8fr; gap: 10px; }
-    @media (max-width: 700px) { .row, .row3, .row4 { grid-template-columns: 1fr; } }
-
-    .rarity-list { display: grid; gap: 12px; margin-top: 8px; }
-    .rar-item { background: #f3f6fb; border: 1px solid var(--line); border-radius: 12px; padding: 10px; }
-
-    .btn { display: inline-flex; gap: 8px; align-items: center; padding: 10px 14px; border-radius: 12px; background: #e6f6ff; border: 1px solid #bae6fd; color: #0b4a6f; cursor: pointer; user-select: none; font-weight: 700; }
-    .btn:hover { background: #dff2ff; }
-    .btn.ghost { background: #fff; border-color: var(--line); color: var(--muted); }
-    .btn.small { padding: 9px 12px; font-size: 14px; }
-    .btn.ok { background: #e7f8ee; border-color: #b7f0cb; color: #064e3b; }
-    .btn.warn { background: #fff7e6; border-color: #fde68a; color: #5b3702; }
-    .btn.bad { background: #ffecec; border-color: #fecaca; color: #7f1d1d; }
-
-    .sticky-cta { position: sticky; bottom: 8px; display: flex; gap: 8px; flex-wrap: wrap; background: transparent; padding-top: 8px; }
-
-    .kpi { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-    .kpi .box { background: #f7f9fc; border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
-    .kpi .val { font-size: 22px; font-weight: 800; letter-spacing: .02em; }
-    .kpi .lbl { color: var(--muted); font-size: 12px; }
-
-    .evbar { height: 12px; background: linear-gradient(90deg, var(--bad), var(--accent-3), var(--ok)); border-radius: 999px; opacity: .9; margin-top: 6px; position: relative; }
-    .evpin { position: absolute; top: -4px; width: 2px; height: 20px; background: #0f172a; border-radius: 2px; }
-
-    .sources { display: grid; gap: 8px; }
-    .src-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
-
-    footer { color: var(--muted); text-align: center; padding: 30px 10px; font-size: 12px; }
-
-    .ad, .aff { background: #ffffff; border: 1px dashed var(--line); border-radius: 12px; padding: 12px; color: var(--muted); font-size: 13px; }
-    .stack { display: grid; gap: 12px; }
-
-    .note { font-size: 12px; color: var(--muted); }
-    .pill { display: inline-block; background: #eef2ff; border: 1px solid #c7d2fe; color: #3730a3; border-radius: 999px; padding: 2px 8px; font-size: 12px; }
-
-    .hr { height: 1px; background: var(--line); margin: 12px 0; }
-
-    @media (max-width: 480px){
-      header .wrap { padding: 10px 12px; }
-      .btn { padding: 12px 14px; }
-      .kpi .val { font-size: 20px; }
-    }
-
-    /* dialog */
-    dialog.settings { width: min(720px, 96vw); border: 1px solid var(--line); border-radius: 14px; padding: 0; }
-    .dlg-head { padding: 14px 16px; border-bottom: 1px solid var(--line); display:flex; justify-content:space-between; align-items:center; }
-    .dlg-body { padding: 14px 16px; display: grid; gap: 10px; }
-    .dlg-foot { padding: 14px 16px; border-top: 1px solid var(--line); display:flex; gap:8px; justify-content:flex-end; }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>トレカ期待値チェッカー β</title>
+<meta name="description" content="遊戯王・ポケカ・ヴァイスなどのトレカボックス期待値ランキング。平均買取・回収率を自動で比較。">
+<meta property="og:title" content="トレカ期待値チェッカー β">
+<meta property="og:description" content="遊戯王・ポケカ・ヴァイス・デュエマ対応の期待値比較ツール">
+<meta property="og:type" content="website">
+<meta name="robots" content="index,follow">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.tailwindcss.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 </head>
-<body>
-  <header>
-    <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-      <div class="brand" aria-label="サイト名と説明">
-        <div class="logo" aria-hidden="true"><span>EV</span></div>
-        <div>
-          <div class="title">遊戯王ボックス期待値チェッカー（β）</div>
-          <div class="sub">Note準拠の簡便式で期待値を算出。やや暗めライトUI/スマホ最適化・アフィ連携対応。</div>
-        </div>
-      </div>
-      <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        <button class="btn small" id="btn-save" title="設定をローカル保存">保存</button>
-        <button class="btn small ghost" id="btn-load" title="保存データを読み込み">読込</button>
-        <button class="btn small ghost" id="btn-reset" title="初期化">リセット</button>
-        <button class="btn small" id="btn-settings" title="APIやアフィIDなどの設定">設定</button>
-      </div>
-    </div>
+
+<body class="bg-gray-50 text-gray-900">
+  <header class="text-center py-6 border-b border-gray-300 bg-white shadow-sm">
+    <h1 class="text-3xl font-bold text-yellow-600">トレカ期待値チェッカー β</h1>
+    <p class="text-sm text-gray-600 mt-1">遊戯王・ポケカ・ヴァイス・デュエマ対応</p>
   </header>
 
-  <main class="wrap">
-    <!-- 左：入力エリア -->
-    <section class="card">
-      <h2>入力（箱の基本情報）</h2>
-      <div class="row">
-        <div>
-          <label for="boxName">ボックス名</label>
-          <input id="boxName" type="text" placeholder="例：QUARTER CENTURY CHRONICLE side:UNITY" />
-        </div>
-        <div>
-          <label for="boxPrice">参考販売価格（1箱, ¥）</label>
-          <input id="boxPrice" type="number" min="0" step="1" placeholder="例：6000" />
-        </div>
-      </div>
-      <div class="row">
-        <div>
-          <label for="packsPerBox">1箱のパック数</label>
-          <input id="packsPerBox" type="number" min="1" step="1" placeholder="例：30" />
-        </div>
-        <div>
-          <label for="memo">メモ（版名・印刷ロット・備考など）<span class="pill">任意</span></label>
-          <input id="memo" type="text" placeholder="例：初版／再販、低確率枠は均等仮定 など" />
-        </div>
-      </div>
-
-      <div class="sticky-cta">
-        <button class="btn" id="btn-autoFill" title="箱名からネット検索APIを呼び出して下のレア枠を自動入力">🔎 自動入力（β）</button>
-        <button class="btn ghost" id="btn-affGen" title="箱名から各ショップ検索リンクを更新">🔗 購入リンク更新</button>
-      </div>
-
-      <div class="hr"></div>
-
-      <h2>レアリティ別の入力（平均買取額×箱あたり封入枚数）</h2>
-      <p class="hint">※ 簡便式：<b>同一レア内は平均価格で均等</b>と仮定。カード別価格を貼り付ければ平均に反映可能。</p>
-      <div id="rarityList" class="rarity-list"></div>
-      <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
-        <button class="btn" id="btn-addRarity">+ レアリティ行を追加</button>
-        <button class="btn ghost" id="btn-addTemplate">テンプレ（UR/SR/SE…）を入れる</button>
-      </div>
-
-      <div class="hr"></div>
-
-      <h2>データソース（上位3〜5サイト）</h2>
-      <p class="hint">参考にした買取表や相場ページのURLを入れてください（透明性向上）。自動入力時は取得元が自動追記されます。</p>
-      <div id="sources" class="sources"></div>
-      <button class="btn small" id="btn-addSrc" style="margin-top:8px;">+ 参照URLを追加</button>
-
-      <div class="hr"></div>
-      <div style="display:flex; gap:8px; flex-wrap:wrap;" class="sticky-cta">
-        <button class="btn ok" id="btn-calc">期待値を計算</button>
-        <button class="btn warn" id="btn-export">JSON書き出し</button>
-        <button class="btn ghost" id="btn-import">JSON読み込み</button>
-      </div>
-      <p class="hint">設定はローカル保存されます（LocalStorage）。</p>
+  <main class="max-w-7xl mx-auto px-4 py-8">
+    <section id="ranking" class="mb-12">
+      <h2 class="text-2xl font-semibold mb-3">📊 最新ランキング</h2>
+      <table id="torekaTable" class="stripe hover w-full text-sm"></table>
+      <p class="text-xs text-gray-500 mt-2">※PRを含みます。データは参考値であり、投資助言を目的としません。</p>
     </section>
 
-    <!-- 右：結果＆広告/アフィ -->
-    <aside class="stack">
-      <section class="card" id="resultCard">
-        <h2>結果</h2>
-        <div class="kpi" aria-live="polite">
-          <div class="box">
-            <div class="lbl">1パック期待値（¥）</div>
-            <div class="val" id="evPerPack">—</div>
-          </div>
-          <div class="box">
-            <div class="lbl">1箱期待値（¥）</div>
-            <div class="val" id="evPerBox">—</div>
-          </div>
-          <div class="box">
-            <div class="lbl">回収率（期待値÷箱価格）</div>
-            <div class="val" id="roi">—</div>
-          </div>
-        </div>
-        <div style="margin-top:10px;">
-          <div class="lbl">回収率ゲージ</div>
-          <div class="evbar"><div id="evpin" class="evpin" style="left:0%"></div></div>
-          <div class="hint">50%未満：厳しめ / 50〜80%：中庸 / 80%以上：強い（平均値。分布は歪みがち）。</div>
-        </div>
-        <div class="hr"></div>
-        <div id="evBreakdown" class="hint">（計算前）</div>
-      </section>
-
-      <section class="aff">
-        <b>アフィリエイト（楽天/Amazon）</b>
-        <div class="hint">箱名から検索リンクを自動生成。設定＞アフィIDにあなたのIDを登録してください。</div>
-        <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
-          <a id="rakutenBtn" class="btn small" target="_blank" rel="noopener" href="https://search.rakuten.co.jp/search/mall/遊戯王%20ボックス/">楽天でボックスを探す</a>
-          <a id="amazonBtn" class="btn small ghost" target="_blank" rel="noopener" href="https://www.amazon.co.jp/s?k=遊戯王%20ボックス">Amazonでボックスを探す</a>
-        </div>
-        <div class="note" style="margin-top:6px;">楽天ハイブリッドリンク／Amazon検索URLの末尾にパラメータを付与できます（設定参照）。</div>
-      </section>
-
-      <section class="ad">
-        <b>広告（Google AdSense）</b>
-        <div class="hint">レスポンシブ広告の例（設定＞AdSenseでクライアントID/スロットIDを保存）。</div>
-        <div id="adsenseSlot" class="note" style="white-space:pre-wrap;">
-          <!-- 設定から有効化すると自動挿入されます -->
-        </div>
-      </section>
-
-      <section class="card">
-        <h2>使い方（超簡略）</h2>
-        <ol class="hint" style="margin:0 0 8px 18px;">
-          <li>箱名・価格・パック数を入力</li>
-          <li>「自動入力（β）」でネット検索APIからレア枠を自動取得（任意）。失敗時は手入力</li>
-          <li>「期待値を計算」で右に結果表示。参照URLを3〜5件入力</li>
-          <li>アフィIDや広告は「設定」から管理</li>
-        </ol>
-        <div class="hint">前提：同レア内は均等封入。初版/再販や非対称配列は未対応。</div>
-      </section>
-    </aside>
+    <section id="calc" class="bg-white rounded-xl shadow p-6">
+      <h2 class="text-xl font-semibold mb-2">🧮 自分で計算してみる</h2>
+      <form id="calcForm" class="grid grid-cols-2 gap-4">
+        <label>パック単価 <input type="number" id="packPrice" class="border p-2 w-full" value="200"></label>
+        <label>パック数 <input type="number" id="packCount" class="border p-2 w-full" value="30"></label>
+        <label>レア1 平均買取 <input type="number" id="r1avg" class="border p-2 w-full" value="900"></label>
+        <label>レア1 封入数 <input type="number" id="r1cpb" class="border p-2 w-full" value="3"></label>
+        <label>レア2 平均買取 <input type="number" id="r2avg" class="border p-2 w-full" value="450"></label>
+        <label>レア2 封入数 <input type="number" id="r2cpb" class="border p-2 w-full" value="6"></label>
+      </form>
+      <button id="calcBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded mt-4">計算する</button>
+      <div id="calcResult" class="mt-4 text-lg font-semibold"></div>
+    </section>
   </main>
 
-  <footer>
-    © <span id="year"></span> Box EV Checker β — 簡便式による参考値。投資判断は自己責任でお願いします。
+  <footer class="text-center text-gray-600 text-sm py-6 border-t border-gray-200 bg-gray-100">
+    <p>© 2025 トレカ期待値チェッカー β | 参考データ：CardRush / yugioh-starter.com</p>
   </footer>
 
-  <!-- 設定ダイアログ（API/アフィ/広告） -->
-  <dialog class="settings" id="dlg-settings">
-    <div class="dlg-head">
-      <strong>設定</strong>
-      <button class="btn small ghost" id="btn-close-settings">閉じる</button>
-    </div>
-    <div class="dlg-body">
-      <div class="row">
-        <div>
-          <label>自動入力APIエンドポイント（GET または POST）</label>
-          <input id="apiEndpoint" type="text" placeholder="例：https://your-cloudfunc.example/api/ygo-ev" />
-          <div class="hint">仕様：{ query: boxName } を渡すと、rarities: [{name, avg, cpb, types}], sources: [url...] を返す想定。CORS許可が必要。</div>
-        </div>
-        <div>
-          <label>タイムアウト（秒）</label>
-          <input id="apiTimeout" type="number" min="3" step="1" placeholder="10" />
-        </div>
-      </div>
+<script src="js/main.js">
+  // js/main.js
+$(document).ready(function () {
+  fetch("data/torekadata.json")
+    .then((r) => r.json())
+    .then((data) => initTable(data))
+    .catch(() => $("#torekaTable").html("<tr><td>データを読み込めませんでした。</td></tr>"));
 
-      <div class="row">
-        <div>
-          <label>楽天アフィ：パラメータ付与</label>
-          <input id="rakutenParams" type="text" placeholder="例：?l-id=affiliate-XXXXX" />
-          <div class="hint">楽天ハイブリッドリンク等。検索URL末尾に連結。</div>
-        </div>
-        <div>
-          <label>Amazonアフィ：パラメータ付与</label>
-          <input id="amazonParams" type="text" placeholder="例：&tag=yourtag-22" />
-        </div>
-      </div>
+  function initTable(data) {
+    const columns = [
+      { title: "ゲーム", data: "game" },
+      { title: "ボックス名", data: "boxName" },
+      { title: "発売日", data: "releaseDate" },
+      { title: "箱価格", data: "boxPrice" },
+      { title: "期待値(合計)", data: "avgBuyTotal" },
+      { title: "1パックEV", data: "packEV" },
+      { title: "回収率", data: "roi_pct" },
+      {
+        title: "アフィリンク",
+        data: "affiliateUrl",
+        render: function (url, type, row) {
+          return `<a href="${url}" target="_blank" class="text-yellow-600 underline">見る</a>`;
+        },
+      },
+    ];
 
-      <div class="row">
-        <div>
-          <label>AdSense クライアントID</label>
-          <input id="adsClient" type="text" placeholder="ca-pub-XXXXXXXXXXXXXXXX" />
-        </div>
-        <div>
-          <label>AdSense スロットID</label>
-          <input id="adsSlot" type="text" placeholder="XXXXXXXXXX" />
-        </div>
-      </div>
-    </div>
-    <div class="dlg-foot">
-      <button class="btn ghost" id="btn-settings-cancel">キャンセル</button>
-      <button class="btn" id="btn-settings-save">保存</button>
-    </div>
-  </dialog>
-
-  <!-- テンプレート -->
-  <template id="rarityRowTpl">
-    <div class="rar-item">
-      <div class="row4">
-        <div>
-          <label>レアリティ名</label>
-          <input type="text" placeholder="例：UR / SR / PSE / QSR など" class="rar-name" />
-        </div>
-        <div>
-          <label>平均買取額（¥）</label>
-          <input type="number" min="0" step="1" placeholder="例：800" class="rar-avg" />
-        </div>
-        <div>
-          <label>箱あたり封入枚数</label>
-          <input type="number" min="0" step="0.01" placeholder="例：5" class="rar-cpb" />
-        </div>
-        <div>
-          <label>カード種数（任意）</label>
-          <input type="number" min="0" step="1" placeholder="例：12" class="rar-types" />
-        </div>
-      </div>
-      <details style="margin-top:8px;">
-        <summary class="hint">▼ 上級：カード別の買取額を貼る（カンマ区切り）→ 平均に反映</summary>
-        <textarea rows="3" class="rar-list" placeholder="例：1200, 900, 300, 200, 150 ..."></textarea>
-        <div style="display:flex; gap:8px; margin-top:8px;">
-          <button type="button" class="btn small ghost btn-calc-avg">平均へ反映</button>
-          <span class="note">※ 半角カンマ/スペース/改行で区切り。数値を抽出します</span>
-        </div>
-      </details>
-      <div style="display:flex; gap:8px; margin-top:8px;">
-        <button type="button" class="btn small ghost btn-dup">複製</button>
-        <button type="button" class="btn small bad btn-del">削除</button>
-      </div>
-    </div>
-  </template>
-
-  <template id="srcRowTpl">
-    <div class="src-row">
-      <input type="text" placeholder="https://...（カードラッシュ/駿河屋/遊々亭/メルカリ 等）" class="src-url" />
-      <button type="button" class="btn small ghost btn-src-del">削除</button>
-    </div>
-  </template>
-
-  <script>
-  const $  = (q, el=document) => el.querySelector(q);
-  const $$ = (q, el=document) => Array.from(el.querySelectorAll(q));
-
-  const els = {
-    boxName: $('#boxName'),
-    boxPrice: $('#boxPrice'),
-    packsPerBox: $('#packsPerBox'),
-    memo: $('#memo'),
-    rarityList: $('#rarityList'),
-    sources: $('#sources'),
-    evPerPack: $('#evPerPack'),
-    evPerBox: $('#evPerBox'),
-    roi: $('#roi'),
-    evpin: $('#evpin'),
-    evBreakdown: $('#evBreakdown'),
-    rakutenBtn: $('#rakutenBtn'),
-    amazonBtn: $('#amazonBtn'),
-    dlg: $('#dlg-settings'),
-    apiEndpoint: $('#apiEndpoint'),
-    apiTimeout: $('#apiTimeout'),
-    rakutenParams: $('#rakutenParams'),
-    amazonParams: $('#amazonParams'),
-    adsClient: $('#adsClient'),
-    adsSlot: $('#adsSlot'),
-    adsenseSlot: $('#adsenseSlot'),
-  };
-
-  const fmt = (n) => isFinite(n) ? n.toLocaleString('ja-JP', { maximumFractionDigits: 2 }) : '—';
-
-  function addRarityRow(data={}) {
-    const tpl = document.getElementById('rarityRowTpl');
-    const node = tpl.content.firstElementChild.cloneNode(true);
-    if (data.name)  node.querySelector('.rar-name').value  = data.name;
-    if (data.avg!=null)   node.querySelector('.rar-avg').value   = data.avg;
-    if (data.cpb!=null)   node.querySelector('.rar-cpb').value   = data.cpb;
-    if (data.types!=null) node.querySelector('.rar-types').value = data.types;
-    if (data.list)  node.querySelector('.rar-list').value  = data.list;
-
-    node.querySelector('.btn-del').addEventListener('click', ()=> node.remove());
-    node.querySelector('.btn-dup').addEventListener('click', ()=> {
-      const d = readRarityRow(node);
-      addRarityRow(d);
+    $("#torekaTable").DataTable({
+      data: data,
+      columns: columns,
+      order: [[6, "desc"]],
+      pageLength: 10,
+      responsive: true,
     });
-    node.querySelector('.btn-calc-avg').addEventListener('click', ()=> {
-      const txt = node.querySelector('.rar-list').value || '';
-      const vals = txt.split(/[^0-9.]+/).map(v=>parseFloat(v)).filter(v=>!isNaN(v));
-      if (!vals.length) return alert('数値が見つかりませんでした');
-      const avg = vals.reduce((a,b)=>a+b,0)/vals.length;
-      node.querySelector('.rar-avg').value = Math.round(avg);
-      node.querySelector('.rar-types').value = vals.length;
-    });
-
-    els.rarityList.appendChild(node);
   }
 
-  function readRarityRow(node){
-    return {
-      name:  node.querySelector('.rar-name').value.trim(),
-      avg:   parseFloat(node.querySelector('.rar-avg').value),
-      cpb:   parseFloat(node.querySelector('.rar-cpb').value),
-      types: parseInt(node.querySelector('.rar-types').value,10) || null,
-      list:  node.querySelector('.rar-list').value.trim()
-    };
-  }
+  // 計算フォーム
+  $("#calcBtn").on("click", function () {
+    const packPrice = parseFloat($("#packPrice").val()) || 0;
+    const packCount = parseFloat($("#packCount").val()) || 0;
+    const rarities = [
+      { avg: parseFloat($("#r1avg").val()) || 0, cpb: parseFloat($("#r1cpb").val()) || 0 },
+      { avg: parseFloat($("#r2avg").val()) || 0, cpb: parseFloat($("#r2cpb").val()) || 0 },
+    ];
+    const boxPrice = packPrice * packCount;
+    const avgBuyTotal = rarities.reduce((s, r) => s + r.avg * r.cpb, 0);
+    const packEV = (avgBuyTotal / packCount).toFixed(0);
+    const roi = (avgBuyTotal / boxPrice).toFixed(2);
+    const roiPct = (roi * 100).toFixed(1) + "%";
+    $("#calcResult").html(`箱価格：${boxPrice}円 ／ 期待値：${avgBuyTotal}円 ／ ROI：${roiPct}`);
+  });
+});
 
-  function addSourceRow(url=''){
-    const tpl = document.getElementById('srcRowTpl');
-    const node = tpl.content.firstElementChild.cloneNode(true);
-    node.querySelector('.src-url').value = url;
-    node.querySelector('.btn-src-del').addEventListener('click', ()=> node.remove());
-    els.sources.appendChild(node);
-  }
-
-  function readAll(){
-    return {
-      boxName: els.boxName.value.trim(),
-      boxPrice: parseFloat(els.boxPrice.value) || 0,
-      packsPerBox: parseInt(els.packsPerBox.value,10) || 1,
-      memo: els.memo.value.trim(),
-      rarities: $$('.rar-item').map(readRarityRow),
-      sources: $$('.src-url').map(i=> i.value.trim()).filter(Boolean),
-      settings: readSettings(),
-      ts: Date.now(),
-    };
-  }
-
-  function calcEV(data){
-    let evBox = 0;
-    const lines = [];
-    for (const r of data.rarities){
-      if (!isFinite(r.avg) || !isFinite(r.cpb)) continue;
-      const partBox = r.avg * r.cpb;
-      evBox += partBox;
-      lines.push(`${r.name || '（名称未入力）'}： 平均¥${fmt(r.avg)} × ${r.cpb}枚/箱 = ¥${fmt(partBox)}`);
-    }
-    const evPack = evBox / (data.packsPerBox || 1);
-    const roi = data.boxPrice ? (evBox / data.boxPrice) : NaN;
-    return { evBox, evPack, roi, lines };
-  }
-
-  function updateView(){
-    const d = readAll();
-    const { evBox, evPack, roi, lines } = calcEV(d);
-    els.evPerPack.textContent = isFinite(evPack) ? `¥${fmt(evPack)}` : '—';
-    els.evPerBox.textContent  = isFinite(evBox)  ? `¥${fmt(evBox)}`  : '—';
-    els.roi.textContent       = isFinite(roi)    ? `${(roi*100).toFixed(1)}%` : '—';
-
-    const pct = Math.max(0, Math.min(100, isFinite(roi) ? roi*100 : 0));
-    els.evpin.style.left = `${pct}%`;
-
-    const sourcesHtml = d.sources.length ? `\n参照URL：\n- ` + d.sources.join(`\n- `) : '';
-    els.evBreakdown.textContent = lines.length ? lines.join('\n') + sourcesHtml : '（入力後に計算ボタンを押してください）';
-
-    updateAffiliateLinks(d.boxName);
-  }
-
-  function save(){
-    const d = readAll();
-    localStorage.setItem('ygo_box_ev_light', JSON.stringify(d));
-    alert('保存しました');
-  }
-
-  function load(){
-    const raw = localStorage.getItem('ygo_box_ev_light');
-    if (!raw) return alert('保存データが見つかりません');
-    const d = JSON.parse(raw);
-    els.boxName.value = d.boxName || '';
-    els.boxPrice.value = d.boxPrice || '';
-    els.packsPerBox.value = d.packsPerBox || '';
-    els.memo.value = d.memo || '';
-
-    els.rarityList.innerHTML = '';
-    (d.rarities || []).forEach(addRarityRow);
-
-    els.sources.innerHTML = '';
-    (d.sources || []).forEach(addSourceRow);
-
-    if (d.settings) writeSettings(d.settings);
-    updateView();
-  }
-
-  function exportJSON(){
-    const blob = new Blob([JSON.stringify(readAll(), null, 2)], {type:'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = Object.assign(document.createElement('a'), { href: url, download: 'ygo_box_ev.json' });
-    document.body.appendChild(a); a.click(); a.remove();
-    URL.revokeObjectURL(url);
-  }
-
-  function importJSON(){
-    const inp = Object.assign(document.createElement('input'), { type: 'file', accept: 'application/json' });
-    inp.addEventListener('change', (e)=>{
-      const file = e.target.files?.[0]; if (!file) return;
-      const fr = new FileReader();
-      fr.onload = ()=>{
-        try{
-          const d = JSON.parse(fr.result);
-          localStorage.setItem('ygo_box_ev_light', JSON.stringify(d));
-          load();
-        }catch(err){ alert('JSONの読み込みに失敗しました'); }
-      };
-      fr.readAsText(file);
-    });
-    inp.click();
-  }
-
-  /* ===== 自動入力（β）：箱名→外部API呼び出し =====
-     注意：ブラウザから直接ショップサイトをクロールすると規約/CORSで失敗します。
-           自前のサーバーレス関数等にリクエスト→整形済みJSONを返す設計。
-           期待レスポンス:
-           {
-             "rarities":[{"name":"UR","avg":1200,"cpb":2,"types":10}, ...],
-             "sources":["https://...","https://..."]
-           }
-  */
-  async function autoFillFromAPI(){
-    const name = els.boxName.value.trim();
-    if (!name) return alert('ボックス名を入力してください');
-
-    const { endpoint, timeoutSec } = getApiConf();
-    if (!endpoint) return alert('設定＞自動入力APIエンドポイントを登録してください');
-
-    try{
-      const ctrl = new AbortController();
-      const t = setTimeout(()=> ctrl.abort(), (timeoutSec||10)*1000);
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: name }),
-        signal: ctrl.signal
-      });
-      clearTimeout(t);
-      if (!res.ok) throw new Error('APIエラー: ' + res.status);
-      const data = await res.json();
-
-      if (Array.isArray(data.rarities)){
-        els.rarityList.innerHTML='';
-        data.rarities.forEach(r => addRarityRow(r));
-      }
-      if (Array.isArray(data.sources)){
-        els.sources.innerHTML='';
-        data.sources.forEach(u => addSourceRow(u));
-      }
-      updateView();
-      alert('自動入力を反映しました');
-    }catch(err){
-      console.error(err);
-      alert('自動入力に失敗しました。API設定やCORS、レスポンス形式をご確認ください。');
-    }
-  }
-
-  /* ===== アフィリンク生成 ===== */
-  function updateAffiliateLinks(boxName){
-    const q = encodeURIComponent(boxName || '遊戯王 ボックス');
-    const st = readSettings();
-    const rakutenBase = `https://search.rakuten.co.jp/search/mall/${q}/`;
-    const amazonBase  = `https://www.amazon.co.jp/s?k=${q}`;
-
-    els.rakutenBtn.href = st.rakutenParams ? (rakutenBase + st.rakutenParams) : rakutenBase;
-    els.amazonBtn.href  = st.amazonParams  ? (amazonBase  + st.amazonParams)  : amazonBase;
-  }
-
-  /* ===== 設定保存／読込 & AdSense挿入 ===== */
-  function readSettings(){
-    return {
-      endpoint: localStorage.getItem('ygo_api_endpoint') || '',
-      timeoutSec: parseInt(localStorage.getItem('ygo_api_timeout')||'10',10),
-      rakutenParams: localStorage.getItem('ygo_rakuten_params') || '',
-      amazonParams: localStorage.getItem('ygo_amazon_params') || '',
-      adsClient: localStorage.getItem('ygo_ads_client') || '',
-      adsSlot: localStorage.getItem('ygo_ads_slot') || ''
-    };
-  }
-  function writeSettings(s){
-    if (s.endpoint!=null)     localStorage.setItem('ygo_api_endpoint', s.endpoint);
-    if (s.timeoutSec!=null)   localStorage.setItem('ygo_api_timeout', String(s.timeoutSec));
-    if (s.rakutenParams!=null)localStorage.setItem('ygo_rakuten_params', s.rakutenParams);
-    if (s.amazonParams!=null) localStorage.setItem('ygo_amazon_params', s.amazonParams);
-    if (s.adsClient!=null)    localStorage.setItem('ygo_ads_client', s.adsClient);
-    if (s.adsSlot!=null)      localStorage.setItem('ygo_ads_slot', s.adsSlot);
-    applyAdsense();
-  }
-  function getApiConf(){
-    const s = readSettings();
-    els.apiEndpoint.value = s.endpoint; els.apiTimeout.value = s.timeoutSec;
-    return { endpoint: s.endpoint, timeoutSec: s.timeoutSec };
-  }
-  function applyAdsense(){
-    const s = readSettings();
-    els.adsenseSlot.innerHTML = '';
-    if (s.adsClient && s.adsSlot){
-      const sc = document.createElement('script');
-      sc.async = true; sc.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${encodeURIComponent(s.adsClient)}`;
-      sc.crossOrigin = 'anonymous';
-      document.head.appendChild(sc);
-      const ins = document.createElement('ins');
-      ins.className = 'adsbygoogle';
-      ins.style.display = 'block';
-      ins.setAttribute('data-ad-client', s.adsClient);
-      ins.setAttribute('data-ad-slot', s.adsSlot);
-      ins.setAttribute('data-ad-format', 'auto');
-      ins.setAttribute('data-full-width-responsive', 'true');
-      els.adsenseSlot.appendChild(ins);
-      const push = document.createElement('script');
-      push.text = '(adsbygoogle = window.adsbygoogle || []).push({});';
-      els.adsenseSlot.appendChild(push);
-    }
-  }
-
-  // 初期化
-  (function init(){
-    const yearEl = document.getElementById('year');
-    if (yearEl) yearEl.textContent = new Date().getFullYear();
-
-    document.getElementById('btn-addRarity').addEventListener('click', ()=> addRarityRow());
-    document.getElementById('btn-addTemplate').addEventListener('click', ()=> {
-      addRarityRow({ name:'UR', avg:'', cpb:'2',   types:'' });
-      addRarityRow({ name:'SR', avg:'', cpb:'5',   types:'' });
-      addRarityRow({ name:'SE/Prismatic', avg:'', cpb:'0.5', types:'' });
-    });
-
-    document.getElementById('btn-addSrc').addEventListener('click', ()=> addSourceRow(''));
-    document.getElementById('btn-calc').addEventListener('click', updateView);
-    document.getElementById('btn-save').addEventListener('click', save);
-    document.getElementById('btn-load').addEventListener('click', load);
-    document.getElementById('btn-reset').addEventListener('click', ()=> { localStorage.removeItem('ygo_box_ev_light'); location.reload(); });
-    document.getElementById('btn-export').addEventListener('click', exportJSON);
-    document.getElementById('btn-import').addEventListener('click', importJSON);
-
-    document.getElementById('btn-settings').addEventListener('click', ()=> els.dlg.showModal());
-    document.getElementById('btn-close-settings').addEventListener('click', ()=> els.dlg.close());
-    document.getElementById('btn-settings-cancel').addEventListener('click', ()=> els.dlg.close());
-    document.getElementById('btn-settings-save').addEventListener('click', ()=>{
-      writeSettings({
-        endpoint: els.apiEndpoint.value.trim(),
-        timeoutSec: parseInt(els.apiTimeout.value||'10',10),
-        rakutenParams: els.rakutenParams.value.trim(),
-        amazonParams: els.amazonParams.value.trim(),
-        adsClient: els.adsClient.value.trim(),
-        adsSlot: els.adsSlot.value.trim(),
-      });
-      alert('設定を保存しました');
-      els.dlg.close();
-      updateView();
-    });
-
-    document.getElementById('btn-autoFill').addEventListener('click', autoFillFromAPI);
-    document.getElementById('btn-affGen').addEventListener('click', ()=> updateAffiliateLinks(els.boxName.value.trim()));
-
-    // 初期状態
-    addRarityRow();
-    addSourceRow('');
-    applyAdsense();
-
-    ['input','change'].forEach(evt => {
-      document.addEventListener(evt, (e)=>{
-        if (e.target.closest('.rar-item') || ['boxName','boxPrice','packsPerBox'].includes(e.target.id)) {
-          updateView();
-        }
-      });
-    });
-
-    updateView();
-  })();
-  </script>
+</script>
 </body>
 </html>

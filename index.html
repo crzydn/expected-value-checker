@@ -198,7 +198,7 @@ let roiMin = 100, roiMax = 200;      // ROI% 初期表示
 let priceMin = 3000, priceMax = 15000; // 価格 初期表示
 
 // JSON 読み込み
-fetch("data/torekadata.json")
+fetch("torekadata.json")
   .then(r => r.json())
   .then(json => {
     // 数値不足を補完・roi/roi_pct を再計算（保守的）
@@ -395,3 +395,4 @@ renderSaved();
 
 </body>
 </html>
+

@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>トレカ期待値チェッカー β｜主要トレカの期待値ランキング</title>
-<meta name="description" content="遊戯王・ポケカ・ヴァイス・デュエマなど主要トレカのボックス期待値を自動集計。平均買取から回収率・1パックEVを計算してランキング表示。">
+<meta name="description" content="遊戯王・ポケカ・ヴァイス・デュエマなど主要トレカのボックス期待値を自動集計。平均買取から回収率・1パック期待値を計算してランキング表示。">
 <meta name="robots" content="index,follow">
 <link rel="icon" href="assets/favicon.ico">
 
@@ -14,42 +14,28 @@
 
 <style>
   :root{
-    --brand:#2563eb;          /* 青 */
-    --brand-2:#60a5fa;        /* 明るい青 */
-    --accent:#f59e0b;         /* ゴールド */
-    --success:#10b981;
-    --muted:#6b7280;
-    --bg:#f8fafc;             /* 背景 */
+    --brand:#2563eb; --brand-2:#60a5fa; --accent:#f59e0b; --bg:#f8fafc; --muted:#6b7280;
   }
-
   body{ background:var(--bg); color:#111827; }
 
-  /* ヘッダー：柔らかいグラデ＋視認性UP */
-  header{
-    background: linear-gradient(90deg, #ffffff 0%, #eaf2ff 40%, #fff7e6 100%);
-    border-bottom: 1px solid #e5e7eb;
-  }
-  .title-lg{ font-size:2rem; }
-  @media (min-width:1024px){ .title-lg{ font-size:2.25rem; } }
+  /* ヘッダー（色味・視認性UP） */
+  header{ background:linear-gradient(90deg,#fff 0%,#eaf2ff 40%,#fff7e6 100%); border-bottom:1px solid #e5e7eb; }
+  .title-lg{ font-size:2rem; } @media(min-width:1024px){ .title-lg{ font-size:2.25rem; } }
+  .h-icon{ display:inline-flex; align-items:center; gap:.5rem; }
+  .h-dot{ width:28px; height:28px; border-radius:8px; background:linear-gradient(135deg,var(--brand),var(--brand-2)); }
 
   /* バッジ・サムネ */
   .badge{ display:inline-block; padding:.15rem .45rem; border-radius:.4rem; background:#fff3cd; color:#92400e; font-size:.75rem; border:1px solid #ffe69c; }
   .thumb{ width:56px; height:56px; object-fit:cover; border-radius:.6rem; border:1px solid #e5e7eb; background:#f1f5f9; }
 
+  /* セクションカード */
+  .section{ background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:1.25rem; }
+
   /* DataTables 調整 */
   .dt-container .dataTables_filter input{ border:1px solid #cbd5e1; }
   table.dataTable thead th, table.dataTable tbody td{ white-space:nowrap; }
   .dt-container{ overflow-x:auto; }
-
-  /* ランキングTop3強調 */
   .is-top{ background:linear-gradient(180deg,#fffbe6,#fff7cc); box-shadow:inset 0 0 0 2px var(--accent); }
-
-  /* セクションカード */
-  .section{ background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:1.25rem; }
-
-  /* カラフル見出し */
-  .h-icon{ display:inline-flex; align-items:center; gap:.5rem; }
-  .h-dot{ width:28px; height:28px; border-radius:8px; background:linear-gradient(135deg,var(--brand),var(--brand-2)); display:inline-block; }
 
   /* 同意モーダル */
   .modal-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.35); display:flex; align-items:center; justify-content:center; z-index:60; }
@@ -58,7 +44,6 @@
 </head>
 
 <body>
-
 <!-- ヘッダー -->
 <header class="py-6">
   <div class="max-w-7xl mx-auto px-4 flex items-center justify-between">
@@ -67,7 +52,7 @@
         <span class="h-dot"></span>
         <h1 class="title-lg font-extrabold text-gray-900 tracking-tight">トレカ期待値チェッカー β</h1>
       </div>
-      <p class="mt-1 text-sm text-gray-600">遊戯王・ポケカ・ヴァイス・デュエマ対応｜回収率・1パックEVを比較</p>
+      <p class="mt-1 text-sm text-gray-600">遊戯王・ポケカ・ヴァイス・デュエマ対応｜回収率・1パック期待値を比較</p>
     </div>
     <span class="hidden lg:inline-block badge">PRを含みます</span>
   </div>
@@ -75,7 +60,7 @@
 
 <main class="max-w-7xl mx-auto px-4 py-8">
 
-  <!-- ① ランキング（※スライダー削除済み） -->
+  <!-- ① ランキング（スライダー無し） -->
   <section id="ranking" class="section mb-8">
     <div class="flex items-center justify-between mb-2">
       <h2 class="text-xl font-semibold"><span class="h-icon"><span class="h-dot" style="background:linear-gradient(135deg,#22c55e,#86efac)"></span>最新期待値ランキング</span></h2>
@@ -189,7 +174,7 @@
 
 <script>
 (async function(){
-  /* ---------- 初回同意ポップアップ ---------- */
+  /* ---------- 初回同意モーダル ---------- */
   const MODAL_KEY = 'toreka_consent_v1';
   const modal = document.getElementById('consentModal');
   const remembered = localStorage.getItem(MODAL_KEY)==='1';
@@ -200,10 +185,10 @@
   };
   document.getElementById('consentCancel').onclick = ()=> { modal.style.display='none'; };
 
-  /* ---------- JSON読み込み＆前処理 ---------- */
+  /* ---------- JSON読み込み ---------- */
   let raw = [];
   try{
-    const r = await fetch('torekadata.json', {cache:'no-store'});
+    const r = await fetch('data/torekadata.json', {cache:'no-store'});
     raw = await r.json();
   }catch(e){
     console.error(e);
@@ -211,23 +196,20 @@
     return;
   }
 
-  // 画像が無い時の「文字サムネ」を生成（Canvas→dataURL）
+  /* ---------- サムネ自動生成（画像URLが無い場合） ---------- */
   function avatarFromText(text='-'){
     const c = document.createElement('canvas'); c.width=112; c.height=112;
     const ctx = c.getContext('2d');
-    // ランダム色（見やすいパステル）
     const colors = ['#93c5fd','#86efac','#fcd34d','#fda4af','#c4b5fd','#a7f3d0'];
-    ctx.fillStyle = colors[(text.length*7)%colors.length];
-    ctx.fillRect(0,0,112,112);
-    ctx.fillStyle = '#0f172a';
-    ctx.font = 'bold 34px system-ui, -apple-system, Segoe UI, Roboto';
+    ctx.fillStyle = colors[(text.length*7)%colors.length]; ctx.fillRect(0,0,112,112);
+    ctx.fillStyle = '#0f172a'; ctx.font = 'bold 34px system-ui, -apple-system, Segoe UI, Roboto';
     ctx.textAlign = 'center'; ctx.textBaseline='middle';
-    const initials = text.replace(/[^A-Za-z0-9一-龥ぁ-んァ-ヶ]/g,'').slice(0,2).toUpperCase() || 'TC';
+    const initials = (text||'TC').replace(/[^A-Za-z0-9一-龥ぁ-んァ-ヶ]/g,'').slice(0,2).toUpperCase() || 'TC';
     ctx.fillText(initials, 56, 56);
     return c.toDataURL('image/png');
   }
 
-  // ゲームコード表示用
+  /* ---------- ゲーム名マッピング / 空行・OTH抑止 ---------- */
   const gameMap = {
     'ygo':'遊戯王','YGO':'遊戯王',
     'pkm':'ポケカ','PKM':'ポケカ',
@@ -236,13 +218,12 @@
     'mtg':'MTG','MTG':'MTG'
   };
 
-  // 整形：空行除外、数値化、ROI自動、OTH非表示
   const data = raw
-    .filter(d => (d && (d.boxName||'').toString().trim() !== ''))   // 空行除外
+    .filter(d => d && (d.boxName||'').toString().trim() !== '') // 空行除外
     .map(d => {
       const n = x => (x===null||x===undefined||x===''||isNaN(Number(x)))?0:Number(x);
       const roiNum = d.roi ? Number(d.roi) : ((n(d.avgBuyTotal)&&n(d.boxPrice)) ? n(d.avgBuyTotal)/n(d.boxPrice) : 0);
-      const gameLabel = gameMap[d.game] || (d.game ? d.game : '');   // OTH抑制
+      const gameLabel = gameMap[d.game] || (d.game ? d.game : ''); // 未入力は空
       return {
         ...d,
         game: gameLabel,
@@ -257,7 +238,7 @@
       };
     });
 
-  /* ---------- ① ランキング ---------- */
+  /* ================= ① ランキング ================= */
   const rankingColumns = [
     {
       title: "商品",
@@ -279,9 +260,9 @@
     },
     { title: "発売", data: "releaseDate" },
     { title: "箱(円)", data: "boxPrice", render: v => Number(v||0).toLocaleString() },
-    { title: "期待(円)", data: "avgBuyTotal", render: v => Number(v||0).toLocaleString() },
-    { title: "1P EV", data: "packEV", render: v => Number(v||0).toLocaleString() },
-    { title: "ROI", data: "roi_pct" },
+    { title: "期待値合計(円)", data: "avgBuyTotal", render: v => Number(v||0).toLocaleString() },
+    { title: "1パック期待値", data: "packEV", render: v => Number(v||0).toLocaleString() },
+    { title: "回収率（％）", data: "roi_pct" },
     { title: "roiNum", data: "roi", visible: false }
   ];
 
@@ -302,13 +283,12 @@
   }
   rankingDT.on('draw', highlightTop3); highlightTop3();
 
-  /* ---------- ③ 全トレカ一覧（タブ切替） ---------- */
+  /* ================= ③ 全トレカ一覧（タブ切替） ================= */
   const games = Array.from(new Set(data.map(d=>d.game).filter(Boolean)));
   const tabsWrap = document.getElementById('gameTabs');
   const makeBtn = (label) => {
     const b = document.createElement('button');
-    b.className = 'px-3 py-1 rounded border text-sm';
-    b.style.background = '#fff';
+    b.className = 'px-3 py-1 rounded border text-sm bg-white';
     b.textContent = label;
     b.addEventListener('click', ()=> setGameFilter(label));
     return b;
@@ -336,9 +316,9 @@
       }
     },
     { title: "箱(円)", data: "boxPrice", render: v => Number(v||0).toLocaleString() },
-    { title: "期待(円)", data: "avgBuyTotal", render: v => Number(v||0).toLocaleString() },
-    { title: "1P EV", data: "packEV", render: v => Number(v||0).toLocaleString() },
-    { title: "ROI", data: "roi_pct" }
+    { title: "期待値合計(円)", data: "avgBuyTotal", render: v => Number(v||0).toLocaleString() },
+    { title: "1パック期待値", data: "packEV", render: v => Number(v||0).toLocaleString() },
+    { title: "回収率（％）", data: "roi_pct" }
   ];
 
   const allDT = $('#allTable').DataTable({
@@ -357,7 +337,7 @@
   }
   setGameFilter('すべて');
 
-  /* ---------- ④ 自分で計算（ローカル保存） ---------- */
+  /* ================= ④ 自分で計算（ローカル保存） ================= */
   const rarityRows = document.getElementById('rarityRows');
   let rarityCount = 0;
   function addRarity(avg=0, cpb=0){
@@ -394,7 +374,7 @@
     const roi = boxPrice? (ev/boxPrice):0;
     const roiPct = (roi*100).toFixed(1)+'%';
     document.getElementById('calcResult').textContent =
-      `箱価格：${boxPrice.toLocaleString()}円 ／ 期待値：${ev.toLocaleString()}円 ／ 1パックEV：${packEV.toLocaleString()}円 ／ ROI：${roiPct}`;
+      `箱価格：${boxPrice.toLocaleString()}円 ／ 期待値合計：${ev.toLocaleString()}円 ／ 1パック期待値：${packEV.toLocaleString()}円 ／ 回収率：${roiPct}`;
     return {boxPrice, ev, packEV, roi, roiPct};
   }
   document.getElementById('calcBtn').addEventListener('click', calcNow);
@@ -405,9 +385,9 @@
     columns: [
       { title: "タイトル", data: "title" },
       { title: "箱価格", data: "boxPrice", render:v=>Number(v||0).toLocaleString() },
-      { title: "期待値", data: "ev", render:v=>Number(v||0).toLocaleString() },
-      { title: "1P EV", data: "packEV", render:v=>Number(v||0).toLocaleString() },
-      { title: "ROI", data: "roiPct" },
+      { title: "期待値合計", data: "ev", render:v=>Number(v||0).toLocaleString() },
+      { title: "1パック期待値", data: "packEV", render:v=>Number(v||0).toLocaleString() },
+      { title: "回収率（％）", data: "roiPct" },
       { title: "保存日時", data: "savedAt" }
     ],
     pageLength: 5,

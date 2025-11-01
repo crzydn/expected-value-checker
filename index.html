@@ -5,163 +5,140 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>トレカ期待値チェッカー β｜主要トレカの期待値ランキング</title>
 <meta name="description" content="遊戯王・ポケカ・ヴァイス・デュエマなど主要トレカのボックス期待値を自動集計。平均買取から回収率・1パックEVを計算してランキング表示。">
-<meta name="keywords" content="遊戯王,ポケカ,トレカ,期待値,回収率,ボックス,相場,買取,ランキング">
 <meta name="robots" content="index,follow">
-<meta name="geo.region" content="JP">
-<meta name="geo.placename" content="Japan">
-<meta property="og:title" content="トレカ期待値チェッカー β｜主要トレカの期待値ランキング">
-<meta property="og:description" content="遊戯王・ポケカ・ヴァイス・デュエマ対応。回収率・1パック期待値を見やすく比較できます。">
-<meta property="og:type" content="website">
 <link rel="icon" href="assets/favicon.ico">
 
-<!-- Tailwind / DataTables / noUiSlider -->
+<!-- Tailwind / DataTables -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.css">
 
 <style>
-  /* 共通 */
-  .badge { display:inline-block; padding:0.1rem .4rem; border-radius:.25rem; background:#fde68a; color:#92400e; font-size:.75rem; }
-  .thumb { width:56px; height:56px; object-fit:cover; border-radius:.5rem; border:1px solid #e5e7eb; }
-  .tab-btn { padding:.45rem .8rem; border:1px solid #e5e7eb; border-radius:.5rem; background:#fff; }
-  .tab-btn.active { background:#fef3c7; border-color:#f59e0b; color:#92400e; }
-  .range-pill { background:#111827; color:#fff; border-radius:9999px; padding:.2rem .6rem; font-size:.75rem; }
-  .pr-card { border:1px solid #fcd34d; border-radius:.75rem; background:#fffbea; }
-  .is-top { background:linear-gradient(180deg,#fffbe6,#fff7cc); box-shadow:inset 0 0 0 2px #fbbf24; }
+  :root{
+    --brand:#2563eb;          /* 青 */
+    --brand-2:#60a5fa;        /* 明るい青 */
+    --accent:#f59e0b;         /* ゴールド */
+    --success:#10b981;
+    --muted:#6b7280;
+    --bg:#f8fafc;             /* 背景 */
+  }
+
+  body{ background:var(--bg); color:#111827; }
+
+  /* ヘッダー：柔らかいグラデ＋視認性UP */
+  header{
+    background: linear-gradient(90deg, #ffffff 0%, #eaf2ff 40%, #fff7e6 100%);
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .title-lg{ font-size:2rem; }
+  @media (min-width:1024px){ .title-lg{ font-size:2.25rem; } }
+
+  /* バッジ・サムネ */
+  .badge{ display:inline-block; padding:.15rem .45rem; border-radius:.4rem; background:#fff3cd; color:#92400e; font-size:.75rem; border:1px solid #ffe69c; }
+  .thumb{ width:56px; height:56px; object-fit:cover; border-radius:.6rem; border:1px solid #e5e7eb; background:#f1f5f9; }
 
   /* DataTables 調整 */
-  .dt-container .dataTables_filter input { border:1px solid #cbd5e1; }
-  table.dataTable thead th, table.dataTable tbody td { white-space:nowrap; }
-  .dt-container { overflow-x:auto; }
+  .dt-container .dataTables_filter input{ border:1px solid #cbd5e1; }
+  table.dataTable thead th, table.dataTable tbody td{ white-space:nowrap; }
+  .dt-container{ overflow-x:auto; }
 
-  /* スライダー重なり対策 */
-  .filter-bar { position:relative; z-index:10; }
-  #rankingTable { position:relative; z-index:1; }
+  /* ランキングTop3強調 */
+  .is-top{ background:linear-gradient(180deg,#fffbe6,#fff7cc); box-shadow:inset 0 0 0 2px var(--accent); }
 
-  /* PCレイアウトのメリハリ */
-  @media (min-width:1024px){
-    header .title-lg { font-size:2.25rem; }  /* 36px */
-    header .sub-lg { font-size:1rem; color:#6b7280; }
-    main .section { padding:1.25rem 1.5rem; border-radius:14px; }
-    #rankingTable_wrapper { padding-top:.75rem; }
-    .filter-grid { display:grid; grid-template-columns: 1fr 1fr auto; gap:1.25rem; align-items:end; }
-    .filter-card { padding:1rem; background:#fff; border:1px solid #e5e7eb; border-radius:12px; }
-  }
+  /* セクションカード */
+  .section{ background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:1.25rem; }
+
+  /* カラフル見出し */
+  .h-icon{ display:inline-flex; align-items:center; gap:.5rem; }
+  .h-dot{ width:28px; height:28px; border-radius:8px; background:linear-gradient(135deg,var(--brand),var(--brand-2)); display:inline-block; }
+
+  /* 同意モーダル */
+  .modal-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.35); display:flex; align-items:center; justify-content:center; z-index:60; }
+  .modal-card{ width:min(560px,92vw); background:#fff; border-radius:14px; border:1px solid #e5e7eb; padding:1.25rem; }
 </style>
-
-<!-- GA4 / Clarity は必要時に有効化
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXX"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-XXXXXXX');</script>
-<script>(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","CLARITY-ID");</script>
--->
 </head>
 
-<body class="bg-gray-50 text-gray-900">
+<body>
 
 <!-- ヘッダー -->
-<header class="py-6 border-b border-gray-200 bg-white shadow-sm">
-  <div class="max-w-7xl mx-auto px-4">
-    <div class="flex items-center justify-between">
-      <div>
-        <h1 class="title-lg font-extrabold text-yellow-600 tracking-tight">トレカ期待値チェッカー β</h1>
-        <p class="sub-lg mt-1">遊戯王・ポケカ・ヴァイス・デュエマ対応｜回収率・1パックEVを比較</p>
+<header class="py-6">
+  <div class="max-w-7xl mx-auto px-4 flex items-center justify-between">
+    <div>
+      <div class="h-icon">
+        <span class="h-dot"></span>
+        <h1 class="title-lg font-extrabold text-gray-900 tracking-tight">トレカ期待値チェッカー β</h1>
       </div>
-      <span class="hidden lg:inline-block badge">PRを含みます</span>
+      <p class="mt-1 text-sm text-gray-600">遊戯王・ポケカ・ヴァイス・デュエマ対応｜回収率・1パックEVを比較</p>
     </div>
+    <span class="hidden lg:inline-block badge">PRを含みます</span>
   </div>
 </header>
 
 <main class="max-w-7xl mx-auto px-4 py-8">
 
-  <!-- ① ランキング -->
-  <section id="ranking" class="mb-8">
-    <div class="flex items-end justify-between">
-      <h2 class="text-2xl font-semibold mb-3">📊 最新期待値ランキング</h2>
+  <!-- ① ランキング（※スライダー削除済み） -->
+  <section id="ranking" class="section mb-8">
+    <div class="flex items-center justify-between mb-2">
+      <h2 class="text-xl font-semibold"><span class="h-icon"><span class="h-dot" style="background:linear-gradient(135deg,#22c55e,#86efac)"></span>最新期待値ランキング</span></h2>
+      <span class="badge">広告・アフィを含みます</span>
     </div>
-
-    <!-- スライダー群（独立バー） -->
-    <div class="filter-bar mb-4">
-      <div class="filter-grid">
-        <div class="filter-card">
-          <div class="flex items-center justify-between mb-2">
-            <label class="font-medium">回収率（ROI %）</label>
-            <span id="roiRange" class="range-pill">—</span>
-          </div>
-          <div id="roiSlider"></div>
-        </div>
-        <div class="filter-card">
-          <div class="flex items-center justify-between mb-2">
-            <label class="font-medium">箱価格（円）</label>
-            <span id="priceRange" class="range-pill">—</span>
-          </div>
-          <div id="priceSlider"></div>
-        </div>
-        <div class="hidden lg:block text-right">
-          <div class="text-xs text-gray-500 mb-1">表示件数</div>
-          <select id="pageSize" class="border rounded p-2">
-            <option>10</option><option>25</option><option>50</option>
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <table id="rankingTable" class="stripe hover w-full text-sm bg-white rounded shadow"></table>
+    <table id="rankingTable" class="stripe hover w-full text-sm"></table>
     <p class="text-xs text-gray-500 mt-2">※ データは参考値であり、投資助言を目的としません。価格は変動します。</p>
   </section>
 
   <!-- ⑤ PR枠 -->
-  <section class="mb-10">
-    <div class="pr-card p-4 flex items-center justify-between">
+  <section class="section mb-10">
+    <div class="flex items-center justify-between">
       <div>
         <div class="text-sm text-gray-700">【PR】人気ボックスをチェック（楽天 / Amazon）</div>
         <div class="text-xs text-gray-500">アフィリエイトリンクを含みます</div>
       </div>
       <div class="flex gap-3">
-        <a href="#" target="_blank" rel="nofollow noopener sponsored" class="px-3 py-2 bg-yellow-400 hover:bg-yellow-500 text-white rounded">楽天</a>
-        <a href="#" target="_blank" rel="nofollow noopener sponsored" class="px-3 py-2 bg-gray-800 hover:bg-black text-white rounded">Amazon</a>
+        <a href="#" target="_blank" rel="nofollow noopener sponsored" class="px-3 py-2 rounded text-white" style="background:linear-gradient(135deg,#f59e0b,#fcd34d);">楽天</a>
+        <a href="#" target="_blank" rel="nofollow noopener sponsored" class="px-3 py-2 rounded text-white" style="background:linear-gradient(135deg,#111827,#4b5563);">Amazon</a>
       </div>
     </div>
   </section>
 
   <!-- ③ 全トレカ一覧（タブ切替） -->
-  <section id="all" class="mb-12">
-    <div class="flex items-end justify-between mb-3">
-      <h3 class="text-2xl font-semibold">📚 全トレカ一覧</h3>
+  <section id="all" class="section mb-12">
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="text-xl font-semibold"><span class="h-icon"><span class="h-dot" style="background:linear-gradient(135deg,#2563eb,#93c5fd)"></span>全トレカ一覧</span></h3>
       <div id="gameTabs" class="flex gap-2"></div>
     </div>
-    <table id="allTable" class="stripe hover w-full text-sm bg-white rounded shadow"></table>
+    <table id="allTable" class="stripe hover w-full text-sm"></table>
   </section>
 
   <!-- ④ 自分で計算 -->
-  <section id="calc" class="bg-white rounded-xl shadow p-6 mb-12">
-    <h3 class="text-xl font-semibold mb-4">🧮 自分で計算してみる（ローカル保存可）</h3>
+  <section id="calc" class="section mb-12">
+    <h3 class="text-xl font-semibold mb-4"><span class="h-icon"><span class="h-dot" style="background:linear-gradient(135deg,#a855f7,#c084fc)"></span>自分で計算する（ローカル保存可）</span></h3>
     <div class="grid md:grid-cols-3 gap-4">
       <label>タイトル（任意）
-        <input type="text" id="c_title" class="border p-2 w-full" placeholder="例：自分用テスト計算">
+        <input type="text" id="c_title" class="border p-2 w-full rounded" placeholder="例：自分用テスト計算">
       </label>
       <label>パック単価（円）
-        <input type="number" id="c_packPrice" class="border p-2 w-full" value="200" min="0">
+        <input type="number" id="c_packPrice" class="border p-2 w-full rounded" value="200" min="0">
       </label>
       <label>パック数（箱）
-        <input type="number" id="c_packCount" class="border p-2 w-full" value="30" min="1">
+        <input type="number" id="c_packCount" class="border p-2 w-full rounded" value="30" min="1">
       </label>
     </div>
     <div id="rarityRows" class="grid md:grid-cols-3 gap-4 mt-4"></div>
-    <div class="mt-3">
+    <div class="mt-3 flex gap-2">
       <button id="addRarity" class="px-3 py-2 bg-gray-200 hover:bg-gray-300 rounded">＋ レアリティ追加</button>
-      <button id="calcBtn" class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded ml-2">計算する</button>
-      <button id="saveCalc" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded ml-2">保存</button>
+      <button id="calcBtn" class="px-4 py-2 text-white rounded" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);">計算する</button>
+      <button id="saveCalc" class="px-4 py-2 text-white rounded" style="background:linear-gradient(135deg,#2563eb,#60a5fa);">保存</button>
     </div>
     <div id="calcResult" class="mt-4 text-lg font-semibold"></div>
+
     <div class="mt-6">
       <h4 class="font-semibold mb-2">💾 保存履歴</h4>
-      <table id="historyTable" class="stripe hover w-full text-sm bg-white rounded shadow"></table>
+      <table id="historyTable" class="stripe hover w-full text-sm"></table>
     </div>
   </section>
 
   <!-- ⑥ 利用規約・免責・プライバシー -->
-  <section id="legal" class="bg-gray-100 rounded-xl p-6">
-    <h3 class="text-xl font-semibold mb-3">📜 利用規約・免責・プライバシーポリシー</h3>
+  <section id="legal" class="section">
+    <h3 class="text-xl font-semibold mb-3"><span class="h-icon"><span class="h-dot" style="background:linear-gradient(135deg,#ef4444,#fca5a5)"></span>利用規約・免責・プライバシーポリシー</span></h3>
     <details class="mb-2" open>
       <summary class="cursor-pointer font-medium">利用規約（要旨）</summary>
       <p class="ml-4 mt-1 text-sm text-gray-700">
@@ -177,73 +154,124 @@
     <details>
       <summary class="cursor-pointer font-medium">プライバシーポリシー</summary>
       <p class="ml-4 mt-1 text-sm text-gray-700">
-        本サイトは利用状況の把握のため解析ツールを使用する場合があります。Cookie等が利用されることがあり、同意の上ご利用ください。投稿機能（将来提供予定）では、投稿者の同意に基づきデータを取り扱います。
+        本サイトは利用状況把握のため解析ツールを使用する場合があります。Cookie等が利用されることがあり、同意の上ご利用ください。投稿機能（将来提供予定）では、投稿者の同意に基づきデータを取り扱います。
       </p>
     </details>
   </section>
 
 </main>
 
-<footer class="text-center text-gray-600 text-sm py-6 border-t border-gray-200 bg-white mt-12">
+<footer class="text-center text-gray-600 text-sm py-6 mt-12">
   <p>© 2025 トレカ期待値チェッカー β | データ参考: CardRush / トレコロ / メルカリ / yugioh-starter.com</p>
   <p class="text-xs mt-2">本ページには広告・アフィリエイトリンクを含みます（PR）。</p>
 </footer>
 
+<!-- 同意ポップアップ（初回表示） -->
+<div id="consentModal" class="modal-backdrop" style="display:none;">
+  <div class="modal-card">
+    <h4 class="text-lg font-semibold mb-2">ご利用にあたってのお願い</h4>
+    <p class="text-sm text-gray-700 mb-3">
+      本サイトは参考情報の提供を目的としており、投資助言を行うものではありません。価格は変動し、実際の相場と異なる場合があります。解析やCookieを用いることがあります。
+    </p>
+    <label class="text-sm inline-flex items-center gap-2 mb-3">
+      <input type="checkbox" id="consentRemember" class="border"> 次回から表示しない（この端末に保存）
+    </label>
+    <div class="flex justify-end gap-2">
+      <button id="consentCancel" class="px-3 py-2 border rounded">キャンセル</button>
+      <button id="consentOK" class="px-4 py-2 text-white rounded" style="background:linear-gradient(135deg,#10b981,#34d399);">同意して進む</button>
+    </div>
+  </div>
+</div>
+
 <!-- ライブラリ -->
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.js"></script>
 
 <script>
 (async function(){
-  // JSON読み込み
-  let data = [];
-  try {
+  /* ---------- 初回同意ポップアップ ---------- */
+  const MODAL_KEY = 'toreka_consent_v1';
+  const modal = document.getElementById('consentModal');
+  const remembered = localStorage.getItem(MODAL_KEY)==='1';
+  if(!remembered){ modal.style.display='flex'; }
+  document.getElementById('consentOK').onclick = ()=> {
+    if(document.getElementById('consentRemember').checked){ localStorage.setItem(MODAL_KEY,'1'); }
+    modal.style.display='none';
+  };
+  document.getElementById('consentCancel').onclick = ()=> { modal.style.display='none'; };
+
+  /* ---------- JSON読み込み＆前処理 ---------- */
+  let raw = [];
+  try{
     const r = await fetch('torekadata.json', {cache:'no-store'});
-    data = await r.json();
-  } catch(e){
+    raw = await r.json();
+  }catch(e){
     console.error(e);
     alert('データを読み込めませんでした。/data/torekadata.json を確認してください。');
     return;
   }
 
-  // 整形：数値化＆補完
-  data = data.map(d => {
-    const n = x => (x === null || x === undefined || x === '' || isNaN(Number(x))) ? 0 : Number(x);
-    const roiNum = d.roi ? Number(d.roi) : ( (n(d.avgBuyTotal) && n(d.boxPrice)) ? (n(d.avgBuyTotal)/n(d.boxPrice)) : 0 );
-    return {
-      ...d,
-      game: d.game || 'OTH',
-      releaseDate: d.releaseDate || '',
-      boxPrice: n(d.boxPrice),
-      avgBuyTotal: n(d.avgBuyTotal),
-      packEV: n(d.packEV),
-      roi: roiNum,
-      roi_pct: d.roi_pct || (roiNum ? (roiNum*100).toFixed(1)+'%' : ''),
-      affiliateImage: d.affiliateImage || '',
-      affiliateUrl: d.affiliateUrl || ''
-    };
-  });
+  // 画像が無い時の「文字サムネ」を生成（Canvas→dataURL）
+  function avatarFromText(text='-'){
+    const c = document.createElement('canvas'); c.width=112; c.height=112;
+    const ctx = c.getContext('2d');
+    // ランダム色（見やすいパステル）
+    const colors = ['#93c5fd','#86efac','#fcd34d','#fda4af','#c4b5fd','#a7f3d0'];
+    ctx.fillStyle = colors[(text.length*7)%colors.length];
+    ctx.fillRect(0,0,112,112);
+    ctx.fillStyle = '#0f172a';
+    ctx.font = 'bold 34px system-ui, -apple-system, Segoe UI, Roboto';
+    ctx.textAlign = 'center'; ctx.textBaseline='middle';
+    const initials = text.replace(/[^A-Za-z0-9一-龥ぁ-んァ-ヶ]/g,'').slice(0,2).toUpperCase() || 'TC';
+    ctx.fillText(initials, 56, 56);
+    return c.toDataURL('image/png');
+  }
 
-  /* ================= ① ランキング ================= */
+  // ゲームコード表示用
+  const gameMap = {
+    'ygo':'遊戯王','YGO':'遊戯王',
+    'pkm':'ポケカ','PKM':'ポケカ',
+    'ws':'ヴァイス','WS':'ヴァイス',
+    'dm':'デュエマ','DM':'デュエマ',
+    'mtg':'MTG','MTG':'MTG'
+  };
+
+  // 整形：空行除外、数値化、ROI自動、OTH非表示
+  const data = raw
+    .filter(d => (d && (d.boxName||'').toString().trim() !== ''))   // 空行除外
+    .map(d => {
+      const n = x => (x===null||x===undefined||x===''||isNaN(Number(x)))?0:Number(x);
+      const roiNum = d.roi ? Number(d.roi) : ((n(d.avgBuyTotal)&&n(d.boxPrice)) ? n(d.avgBuyTotal)/n(d.boxPrice) : 0);
+      const gameLabel = gameMap[d.game] || (d.game ? d.game : '');   // OTH抑制
+      return {
+        ...d,
+        game: gameLabel,
+        releaseDate: d.releaseDate || '',
+        boxPrice: n(d.boxPrice),
+        avgBuyTotal: n(d.avgBuyTotal),
+        packEV: n(d.packEV),
+        roi: roiNum,
+        roi_pct: d.roi_pct || (roiNum ? (roiNum*100).toFixed(1)+'%' : ''),
+        affiliateImage: d.affiliateImage || avatarFromText(d.boxName||'-'),
+        affiliateUrl: d.affiliateUrl || ''
+      };
+    });
+
+  /* ---------- ① ランキング ---------- */
   const rankingColumns = [
-    { title: "ゲーム", data: "game", visible:false },
     {
       title: "商品",
       data: null,
       render: function(_, __, row){
-        const img = row.affiliateImage ?
-          `<img src="${row.affiliateImage}" alt="${row.boxName}" class="thumb">` :
-          `<div class="thumb bg-gray-100"></div>`;
-        const name = row.boxName || "-";
+        const img = `<img src="${row.affiliateImage}" alt="${row.boxName}" class="thumb">`;
         const linkOpen = row.affiliateUrl ? `<a href="${row.affiliateUrl}" target="_blank" rel="nofollow noopener sponsored" class="text-blue-700 underline">` : `<span>`;
         const linkClose = row.affiliateUrl ? `</a>` : `</span>`;
         const pr = row.affiliateUrl ? `<span class="badge ml-2">PR</span>` : '';
-        const sub = `${row.game}｜${row.releaseDate || ''}`;
+        const sub = `${row.game||''} ${row.releaseDate? '｜'+row.releaseDate : ''}`;
         return `<div class="flex items-center gap-3">
                   ${img}
                   <div>
-                    <div class="font-medium">${linkOpen}${name}${linkClose}${pr}</div>
+                    <div class="font-medium">${linkOpen}${row.boxName||'-'}${linkClose}${pr}</div>
                     <div class="text-xs text-gray-500">${sub}</div>
                   </div>
                 </div>`;
@@ -260,89 +288,33 @@
   const rankingDT = $('#rankingTable').DataTable({
     data,
     columns: rankingColumns,
-    order: [[7, "desc"]],
+    order: [[6, "desc"]],
     pageLength: 10,
-    autoWidth: false,
-    scrollX: true,
-    fixedHeader: true,
-    columnDefs: [
-      { targets: 2, width: 96 },
-      { targets: 3, width: 110 },
-      { targets: 4, width: 110 },
-      { targets: 5, width: 100 },
-      { targets: 6, width: 85 }
-    ],
+    autoWidth:false,
+    scrollX:true,
     language: { url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/ja.json" }
   });
 
-  // Top3強調
   function highlightTop3(){
     $(rankingDT.rows().nodes()).removeClass('is-top');
     const idx = rankingDT.rows({search:'applied', order:'applied'}).indexes().toArray().slice(0,3);
     idx.forEach(i => $(rankingDT.row(i).node()).addClass('is-top'));
   }
-  rankingDT.on('draw', highlightTop3);
-  highlightTop3();
+  rankingDT.on('draw', highlightTop3); highlightTop3();
 
-  /* =============== ② スライダー（ROI/価格） =============== */
-  const roiVals = data.map(d=>Math.round((d.roi||0)*100)).filter(x=>isFinite(x));
-  const priceVals = data.map(d=>Number(d.boxPrice||0)).filter(x=>isFinite(x));
-
-  const roiMin = roiVals.length? Math.min(...roiVals):0;
-  const roiMax = roiVals.length? Math.max(...roiVals):200;
-  const priceMin = priceVals.length? Math.min(...priceVals):0;
-  const priceMax = priceVals.length? Math.max(...priceVals):15000;
-
-  function percentile(arr, p){
-    if (!arr.length) return 0;
-    const s=[...arr].sort((a,b)=>a-b);
-    const idx=Math.min(s.length-1,Math.max(0,Math.round((p/100)*(s.length-1))));
-    return s[idx];
-  }
-  const roiStart = [ Math.floor(percentile(roiVals,10)), Math.ceil(percentile(roiVals,90)) ];
-  const priceStart = [ Math.floor(percentile(priceVals,10)), Math.ceil(percentile(priceVals,90)) ];
-
-  const roiSlider = document.getElementById('roiSlider');
-  const priceSlider = document.getElementById('priceSlider');
-  noUiSlider.create(roiSlider,{ start: roiStart, connect:true, step:1, range:{min:0,max:Math.max(200,roiMax)} });
-  noUiSlider.create(priceSlider,{ start: priceStart, connect:true, step:100, range:{min:0,max:Math.max(20000,priceMax)} });
-
-  const roiRangeEl = document.getElementById('roiRange');
-  const priceRangeEl = document.getElementById('priceRange');
-
-  function applyFilters(){
-    const [rMin, rMax] = roiSlider.noUiSlider.get().map(Number);
-    const [pMin, pMax] = priceSlider.noUiSlider.get().map(Number);
-    roiRangeEl.textContent = `${Math.round(rMin)}% 〜 ${Math.round(rMax)}%`;
-    priceRangeEl.textContent = `${Math.round(pMin).toLocaleString()}円 〜 ${Math.round(pMax).toLocaleString()}円`;
-
-    $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter(f => !f.__isTorekaFilter);
-    $.fn.dataTable.ext.search.push(function(settings, dataArr, dataIndex){
-      if (settings.nTable.id !== 'rankingTable') return true;
-      const roiNum = Number(rankingDT.row(dataIndex).data().roi||0)*100;
-      const price = Number(rankingDT.row(dataIndex).data().boxPrice||0);
-      return (roiNum >= rMin && roiNum <= rMax && price >= pMin && price <= pMax);
-    });
-    $.fn.dataTable.ext.search[$.fn.dataTable.ext.search.length-1].__isTorekaFilter = true;
-    rankingDT.draw();
-  }
-  roiSlider.noUiSlider.on('update', applyFilters);
-  priceSlider.noUiSlider.on('update', applyFilters);
-  $('#pageSize').on('change', function(){ rankingDT.page.len(Number(this.value)).draw(); });
-  applyFilters();
-
-  /* =============== ③ 全トレカ一覧（タブ切替） =============== */
-  const games = Array.from(new Set(data.map(d=>d.game||'OTH')));
+  /* ---------- ③ 全トレカ一覧（タブ切替） ---------- */
+  const games = Array.from(new Set(data.map(d=>d.game).filter(Boolean)));
   const tabsWrap = document.getElementById('gameTabs');
   const makeBtn = (label) => {
     const b = document.createElement('button');
-    b.className = 'tab-btn'; b.textContent = label; b.dataset.game = label;
+    b.className = 'px-3 py-1 rounded border text-sm';
+    b.style.background = '#fff';
+    b.textContent = label;
     b.addEventListener('click', ()=> setGameFilter(label));
     return b;
   };
-  tabsWrap.appendChild(makeBtn('ALL'));
+  tabsWrap.appendChild(makeBtn('すべて'));
   games.forEach(g => tabsWrap.appendChild(makeBtn(g)));
-  function activateTab(label){ [...tabsWrap.children].forEach(el => el.classList.toggle('active', el.textContent === label)); }
 
   const allColumns = [
     { title: "ゲーム", data: "game" },
@@ -350,7 +322,7 @@
       title: "商品",
       data: null,
       render: function(_, __, row){
-        const img = row.affiliateImage ? `<img src="${row.affiliateImage}" alt="${row.boxName}" class="thumb">` : `<div class="thumb bg-gray-100"></div>`;
+        const img = `<img src="${row.affiliateImage}" alt="${row.boxName}" class="thumb">`;
         const linkOpen = row.affiliateUrl ? `<a href="${row.affiliateUrl}" target="_blank" rel="nofollow noopener sponsored" class="text-blue-700 underline">` : `<span>`;
         const linkClose = row.affiliateUrl ? `</a>` : `</span>`;
         const pr = row.affiliateUrl ? `<span class="badge ml-2">PR</span>` : '';
@@ -366,7 +338,7 @@
     { title: "箱(円)", data: "boxPrice", render: v => Number(v||0).toLocaleString() },
     { title: "期待(円)", data: "avgBuyTotal", render: v => Number(v||0).toLocaleString() },
     { title: "1P EV", data: "packEV", render: v => Number(v||0).toLocaleString() },
-    { title: "ROI", data: "roi_pct" },
+    { title: "ROI", data: "roi_pct" }
   ];
 
   const allDT = $('#allTable').DataTable({
@@ -375,17 +347,17 @@
     order: [[0,'asc'],[5,'desc']],
     pageLength: 10,
     autoWidth:false,
-    scrollX:true
+    scrollX:true,
+    language: { url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/ja.json" }
   });
 
   function setGameFilter(label){
-    activateTab(label);
-    if (label === 'ALL') { allDT.column(0).search('').draw(); }
+    if (label === 'すべて') { allDT.column(0).search('').draw(); }
     else { allDT.column(0).search('^'+label+'$', true, false).draw(); }
   }
-  setGameFilter('ALL');
+  setGameFilter('すべて');
 
-  /* =============== ④ 自分で計算（LocalStorage） =============== */
+  /* ---------- ④ 自分で計算（ローカル保存） ---------- */
   const rarityRows = document.getElementById('rarityRows');
   let rarityCount = 0;
   function addRarity(avg=0, cpb=0){
@@ -396,10 +368,10 @@
     wrap.innerHTML = `
       <div class="font-medium mb-2">レア${rarityCount}</div>
       <label class="block text-sm">平均買取（円）
-        <input type="number" class="r-avg border p-2 w-full mt-1" value="${avg}">
+        <input type="number" class="r-avg border p-2 w-full mt-1 rounded" value="${avg}">
       </label>
       <label class="block text-sm mt-2">封入数（枚）
-        <input type="number" class="r-cpb border p-2 w-full mt-1" value="${cpb}">
+        <input type="number" class="r-cpb border p-2 w-full mt-1 rounded" value="${cpb}">
       </label>
       <button type="button" class="mt-2 text-xs text-red-600 underline remove">削除</button>
     `;
@@ -440,7 +412,8 @@
     ],
     pageLength: 5,
     autoWidth:false,
-    scrollX:true
+    scrollX:true,
+    language: { url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/ja.json" }
   });
 
   function loadHistory(){
@@ -466,4 +439,3 @@
 </script>
 </body>
 </html>
-

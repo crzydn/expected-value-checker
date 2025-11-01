@@ -188,7 +188,7 @@
   /* ---------- JSON読み込み ---------- */
   let raw = [];
   try{
-    const r = await fetch('data/torekadata.json', {cache:'no-store'});
+    const r = await fetch('torekadata.json', {cache:'no-store'});
     raw = await r.json();
   }catch(e){
     console.error(e);

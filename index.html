@@ -199,7 +199,7 @@
   // JSON読み込み
   let data = [];
   try {
-    const r = await fetch('data/torekadata.json', {cache:'no-store'});
+    const r = await fetch('torekadata.json', {cache:'no-store'});
     data = await r.json();
   } catch(e){
     console.error(e);
@@ -466,3 +466,4 @@
 </script>
 </body>
 </html>
+

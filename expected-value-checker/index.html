@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>トレカ期待値チェッカー β｜主要トレカの期待値ランキング</title>
+<meta name="description" content="遊戯王・ポケカ・ヴァイス・デュエマなど主要トレカのボックス期待値を自動集計。平均買取から回収率と1パック期待値を計算してランキング表示。">
+<meta name="robots" content="index,follow">
+<link rel="icon" href="assets/favicon.ico">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<style>
+  :root{ --brand:#2563eb; --brand-2:#60a5fa; --accent:#f59e0b; --bg:#f8fafc; }
+  body{ background:var(--bg); color:#111827; }
+  header{ background:linear-gradient(90deg,#fff 0%,#eaf2ff 40%,#fff7e6 100%); border-bottom:1px solid #e5e7eb; }
+  .title-lg{ font-size:2rem; } @media(min-width:1024px){ .title-lg{ font-size:2.25rem; } }
+  .h-icon{ display:inline-flex; align-items:center; gap:.5rem; }
+  .h-dot{ width:28px; height:28px; border-radius:8px; background:linear-gradient(135deg,var(--brand),var(--brand-2)); }
+  .badge{ display:inline-block; padding:.15rem .45rem; border-radius:.4rem; background:#fff3cd; color:#92400e; font-size:.75rem; border:1px solid #ffe69c; }
+  .thumb{ width:56px; height:56px; object-fit:cover; border-radius:.6rem; border:1px solid #e5e7eb; background:#f1f5f9; }
+  .section{ background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:1.25rem; }
+  .dt-container .dataTables_filter input{ border:1px solid #cbd5e1; }
+  table.dataTable thead th, table.dataTable tbody td{ white-space:nowrap; }
+  .dt-container{ overflow-x:auto; }
+  .is-top{ background:linear-gradient(180deg,#fffbe6,#fff7cc); box-shadow:inset 0 0 0 2px var(--accent); }
+  .modal-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.35); display:flex; align-items:center; justify-content:center; z-index:60; }
+  .modal-card{ width:min(560px,92vw); background:#fff; border-radius:14px; border:1px solid #e5e7eb; padding:1.25rem; }
+</style>
+</head>
+<body>
+<header class="py-6">
+  <div class="max-w-7xl mx-auto px-4 flex items-center justify-between">
+    <div>
+      <div class="h-icon"><span class="h-dot"></span><h1 class="title-lg font-extrabold">トレカ期待値チェッカー β</h1></div>
+      <p class="mt-1 text-sm text-gray-600">回収率と1パック期待値を比較（遊戯王・ポケカ・ヴァイス・デュエマ）</p>
+    </div>
+    <span class="hidden lg:inline-block badge">PRを含みます</span>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-4 py-8">
+  <section id="ranking" class="section mb-8">
+    <div class="flex items-center justify-between mb-2">
+      <h2 class="text-xl font-semibold"><span class="h-icon"><span class="h-dot" style="background:linear-gradient(135deg,#22c55e,#86efac)"></span>最新期待値ランキング</span></h2>
+      <div class="flex gap-2">
+        <a id="share-line" class="px-3 py-2 rounded text-white" style="background:#06C755">LINEで共有</a>
+        <a id="share-x" class="px-3 py-2 rounded text-white" style="background:#000">Xで共有</a>
+        <button id="share-img" class="px-3 py-2 rounded text-white" style="background:linear-gradient(135deg,#111827,#4b5563)">画像DL</button>
+      </div>
+    </div>
+    <table id="rankingTable" class="stripe hover w-full text-sm"></table>
+    <p class="text-xs text-gray-500 mt-2">※ データは参考値であり、投資助言を目的としません。価格は変動します。</p>
+  </section>
+
+  <section class="section mb-10">
+    <div class="flex items-center justify-between">
+      <div>
+        <div class="text-sm text-gray-700">【PR】人気ボックスをチェック（楽天 / Amazon）</div>
+        <div class="text-xs text-gray-500">アフィリエイトリンクを含みます</div>
+      </div>
+      <div class="flex gap-3">
+        <a href="#" target="_blank" rel="nofollow noopener sponsored" class="px-3 py-2 rounded text-white" style="background:linear-gradient(135deg,#f59e0b,#fcd34d);">楽天</a>
+        <a href="#" target="_blank" rel="nofollow noopener sponsored" class="px-3 py-2 rounded text-white" style="background:linear-gradient(135deg,#111827,#4b5563);">Amazon</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="all" class="section mb-12">
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="text-xl font-semibold"><span class="h-icon"><span class="h-dot" style="background:linear-gradient(135deg,#2563eb,#93c5fd)"></span>全トレカ一覧</span></h3>
+      <div id="gameTabs" class="flex gap-2"></div>
+    </div>
+    <table id="allTable" class="stripe hover w-full text-sm"></table>
+  </section>
+
+  <section id="legal" class="section">
+    <h3 class="text-xl font-semibold mb-3"><span class="h-icon"><span class="h-dot" style="background:linear-gradient(135deg,#ef4444,#fca5a5)"></span>利用規約・免責・プライバシー</span></h3>
+    <details class="mb-2" open><summary class="cursor-pointer font-medium">利用規約（要旨）</summary>
+      <p class="ml-4 mt-1 text-sm text-gray-700">本サイトは参考情報の提供を目的としており、投資助言等を行うものではありません。掲載情報の正確性・完全性・最新性を保証しません。ご利用は自己責任でお願いします。</p>
+    </details>
+    <details class="mb-2"><summary class="cursor-pointer font-medium">免責事項</summary>
+      <p class="ml-4 mt-1 text-sm text-gray-700">価格・相場は変動します。外部サイトの仕様変更・アクセス障害・情報遅延等により生じたいかなる損害についても当方は責任を負いません。</p>
+    </details>
+    <details><summary class="cursor-pointer font-medium">プライバシーポリシー</summary>
+      <p class="ml-4 mt-1 text-sm text-gray-700">本サイトは利用状況の把握のため解析ツールを使用する場合があります。Cookie等が利用されることがあり、同意の上ご利用ください。投稿機能（将来提供予定）では、投稿者の同意に基づきデータを取り扱います。</p>
+    </details>
+  </section>
+</main>
+
+<footer class="text-center text-gray-600 text-sm py-6 mt-12">
+  <p>© 2025 トレカ期待値チェッカー β | データ参考: CardRush / トレコロ / メルカリ / yugioh-starter.com</p>
+  <p class="text-xs mt-2">本ページには広告・アフィリエイトリンクを含みます（PR）。</p>
+</footer>
+
+<!-- 同意ポップアップ -->
+<div id="consentModal" class="modal-backdrop" style="display:none;">
+  <div class="modal-card">
+    <h4 class="text-lg font-semibold mb-2">ご利用にあたってのお願い</h4>
+    <p class="text-sm text-gray-700 mb-3">本サイトは参考情報の提供を目的としており、投資助言を行うものではありません。価格は変動し、実際の相場と異なる場合があります。解析やCookieを用いることがあります。</p>
+    <label class="text-sm inline-flex items-center gap-2 mb-3"><input type="checkbox" id="consentRemember" class="border"> 次回から表示しない（この端末に保存）</label>
+    <div class="flex justify-end gap-2">
+      <button id="consentCancel" class="px-3 py-2 border rounded">キャンセル</button>
+      <button id="consentOK" class="px-4 py-2 text-white rounded" style="background:linear-gradient(135deg,#10b981,#34d399);">同意して進む</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script>
+(async function(){
+  /* 同意 */
+  const MODAL_KEY='toreka_consent_v1', modal=document.getElementById('consentModal');
+  if(localStorage.getItem(MODAL_KEY)!=='1'){ modal.style.display='flex'; }
+  document.getElementById('consentOK').onclick=()=>{ if(document.getElementById('consentRemember').checked){localStorage.setItem(MODAL_KEY,'1');} modal.style.display='none';};
+  document.getElementById('consentCancel').onclick=()=>{ modal.style.display='none'; };
+
+  /* データ読込 */
+  let raw=[]; try{ const r=await fetch('data/torekadata.json',{cache:'no-store'}); raw=await r.json(); }catch(e){ alert('データ読み込み失敗'); return; }
+
+  /* サムネ自動生成（画像URL無い時） */
+  function avatarFromText(text='-'){ const c=document.createElement('canvas'); c.width=112;c.height=112; const x=c.getContext('2d'); const cs=['#93c5fd','#86efac','#fcd34d','#fda4af','#c4b5fd','#a7f3d0']; x.fillStyle=cs[(text.length*7)%cs.length]; x.fillRect(0,0,112,112); x.fillStyle='#0f172a'; x.font='bold 34px system-ui'; x.textAlign='center'; x.textBaseline='middle'; const t=(text||'TC').replace(/[^A-Za-z0-9一-龥ぁ-んァ-ヶ]/g,'').slice(0,2).toUpperCase()||'TC'; x.fillText(t,56,56); return c.toDataURL('image/png'); }
+
+  /* ゲーム名マップ */
+  const gameMap={ygo:'遊戯王',YGO:'遊戯王',pkm:'ポケカ',PKM:'ポケカ',ws:'ヴァイス',WS:'ヴァイス',dm:'デュエマ',DM:'デュエマ',mtg:'MTG',MTG:'MTG'};
+
+  /* 整形 */
+  function toSlug(s){ return (s||'').toLowerCase().trim().replace(/[^\w一-龥ぁ-んァ-ヶ]+/g,'-').replace(/^-+|-+$/g,''); }
+  const data = raw.filter(d=>d&&(d.boxName||'').trim()!=='').map(d=>{
+    const n=x=>(x==null||x===''||isNaN(Number(x)))?0:Number(x);
+    const roi=d.roi?Number(d.roi):((n(d.avgBuyTotal)&&n(d.boxPrice))?n(d.avgBuyTotal)/n(d.boxPrice):0);
+    const slug=d.slug||toSlug(d.boxName);
+    return {...d,
+      slug,
+      game: gameMap[d.game] || (d.game||''),
+      releaseDate: d.releaseDate||'',
+      boxPrice:n(d.boxPrice), avgBuyTotal:n(d.avgBuyTotal), packEV:n(d.packEV),
+      roi, roi_pct: d.roi_pct || (roi? (roi*100).toFixed(1)+'%':'' ),
+      affiliateImage: d.affiliateImage || avatarFromText(d.boxName||'-'),
+      affiliateUrl: d.affiliateUrl || ''
+    };
+  });
+
+  /* ランキング */
+  const rankCols=[
+    { title:"商品", data:null, render:(_,__,row)=>{
+        const img=`<img src="${row.affiliateImage}" alt="${row.boxName}" class="thumb">`;
+        const title=`<a href="/box/${encodeURIComponent(row.slug)}" class="text-blue-700 underline">${row.boxName||'-'}</a>`;
+        const pr=row.affiliateUrl?`<a class="badge ml-2" href="${row.affiliateUrl}" target="_blank" rel="nofollow noopener sponsored">PR</a>`:'';
+        const sub=`${row.game||''}${row.releaseDate?'｜'+row.releaseDate:''}`;
+        return `<div class="flex items-center gap-3">${img}<div><div class="font-medium">${title}${pr}</div><div class="text-xs text-gray-500">${sub}</div></div></div>`;
+    }},
+    { title:"発売", data:"releaseDate" },
+    { title:"箱(円)", data:"boxPrice", render:v=>Number(v||0).toLocaleString() },
+    { title:"期待値合計(円)", data:"avgBuyTotal", render:v=>Number(v||0).toLocaleString() },
+    { title:"1パック期待値", data:"packEV", render:v=>Number(v||0).toLocaleString() },
+    { title:"回収率（％）", data:"roi_pct" },
+    { title:"roi", data:"roi", visible:false }
+  ];
+  const rankingDT = $('#rankingTable').DataTable({
+    data, columns:rankCols, order:[[6,"desc"]], pageLength:10, autoWidth:false, scrollX:true,
+    language:{ url:"//cdn.datatables.net/plug-ins/1.13.6/i18n/ja.json" }
+  });
+  function top3(){ $(rankingDT.rows().nodes()).removeClass('is-top'); rankingDT.rows({order:'applied'}).indexes().toArray().slice(0,3).forEach(i=>$(rankingDT.row(i).node()).addClass('is-top')); }
+  rankingDT.on('draw', top3); top3();
+
+  /* 一覧タブ */
+  const games = Array.from(new Set(data.map(d=>d.game).filter(Boolean)));
+  const tabs=document.getElementById('gameTabs'); function mkBtn(t){const b=document.createElement('button'); b.className='px-3 py-1 rounded border text-sm bg-white'; b.textContent=t; b.onclick=()=>setFilter(t); return b;}
+  tabs.appendChild(mkBtn('すべて')); games.forEach(g=>tabs.appendChild(mkBtn(g)));
+  const allDT=$('#allTable').DataTable({
+    data, columns:[
+      { title:"ゲーム", data:"game" },
+      { title:"商品", data:null, render:(_,__,row)=>{
+          const img=`<img src="${row.affiliateImage}" alt="${row.boxName}" class="thumb">`;
+          const link=`<a href="/box/${encodeURIComponent(row.slug)}" class="text-blue-700 underline">${row.boxName||'-'}</a>`;
+          const pr=row.affiliateUrl?`<a class="badge ml-2" href="${row.affiliateUrl}" target="_blank" rel="nofollow noopener sponsored">PR</a>`:'';
+          return `<div class="flex items-center gap-3">${img}<div><div class="font-medium">${link}${pr}</div><div class="text-xs text-gray-500">${row.releaseDate||''}</div></div></div>`;
+      }},
+      { title:"箱(円)", data:"boxPrice", render:v=>Number(v||0).toLocaleString() },
+      { title:"期待値合計(円)", data:"avgBuyTotal", render:v=>Number(v||0).toLocaleString() },
+      { title:"1パック期待値", data:"packEV", render:v=>Number(v||0).toLocaleString() },
+      { title:"回収率（％）", data:"roi_pct" }
+    ],
+    order:[[0,'asc'],[5,'desc']], pageLength:10, autoWidth:false, scrollX:true,
+    language:{ url:"//cdn.datatables.net/plug-ins/1.13.6/i18n/ja.json" }
+  });
+  function setFilter(label){ if(label==='すべて'){ allDT.column(0).search('').draw(); }else{ allDT.column(0).search('^'+label+'$',true,false).draw(); } }
+  setFilter('すべて');
+
+  /* 共有ボタン */
+  const ttl=document.title; const url=location.origin+location.pathname;
+  document.getElementById('share-line').href=`https://line.me/R/msg/text/?${encodeURIComponent(ttl+'\n'+url)}`;
+  document.getElementById('share-x').href=`https://x.com/intent/tweet?text=${encodeURIComponent(ttl)}&url=${encodeURIComponent(url)}`;
+  document.getElementById('share-img').onclick=()=>{ window.open('/og/box/top','_blank'); };
+})();
+</script>
+</body>
+</html>

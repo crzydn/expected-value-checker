@@ -1,6 +1,6 @@
 // /embed/widget.js
 (function(){
-  const WORKER_BASE = 'https://evchecker.crzydn.workers.dev/';
+  const WORKER_BASE = 'https://evchecker.crzydn.workers.dev';
   const s=document.currentScript; const slug=s.dataset.box;
   const wrap=document.createElement('div');
   wrap.style.cssText="border:1px solid #eee;padding:12px;border-radius:12px;font-family:system-ui, sans-serif";
@@ -17,4 +17,5 @@
     `;
   }).catch(()=>{ wrap.innerHTML="<div>データ取得に失敗しました</div>"; });
 })();
+
 

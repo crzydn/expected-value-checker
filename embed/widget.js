@@ -1,12 +1,13 @@
 // /embed/widget.js
 (function(){
+  const WORKER_BASE = 'https://YOUR-WORKER.workers.dev';
   const s=document.currentScript; const slug=s.dataset.box;
   const wrap=document.createElement('div');
   wrap.style.cssText="border:1px solid #eee;padding:12px;border-radius:12px;font-family:system-ui, sans-serif";
   wrap.innerHTML="<div>Loading…</div>";
   s.parentNode.insertBefore(wrap,s);
 
-  const u = `/api/v1/answercard?box=${encodeURIComponent(slug)}`;
+  const u = `${WORKER_BASE}/api/v1/answercard?box=${encodeURIComponent(slug)}`;
   fetch(u).then(r=>r.json()).then(j=>{
     const a=j||{};
     wrap.innerHTML = `

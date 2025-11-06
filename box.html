@@ -22,12 +22,10 @@
 
 <main class="max-w-5xl mx-auto px-4 py-8">
   <div id="boxCard" class="bg-white rounded-xl border p-5 shadow-sm"></div>
-
   <section class="mt-8 bg-white rounded-xl border p-5 shadow-sm">
     <h2 class="text-xl font-semibold mb-3">価格・期待値</h2>
     <div id="stats" class="grid sm:grid-cols-2 gap-4"></div>
   </section>
-
   <section class="mt-8 bg-white rounded-xl border p-5 shadow-sm">
     <h3 class="text-lg font-semibold mb-3">共有</h3>
     <div class="flex gap-2">
@@ -36,7 +34,6 @@
       <a id="share-img" class="px-3 py-2 rounded text-white" style="background:linear-gradient(135deg,#111827,#4b5563)">画像DL</a>
     </div>
   </section>
-
   <section class="mt-8 text-xs text-gray-500">
     <p>※ 本ページは参考情報であり、投資助言ではありません。価格は変動します。</p>
   </section>
@@ -44,7 +41,8 @@
 
 <script>
 (async function(){
-  function getSlug(){ const u=new URL(location.href); return u.searchParams.get('slug') || location.pathname.split('/').pop(); }
+  const WORKER_BASE = 'https://YOUR-WORKER.workers.dev';
+  function getSlug(){ const u=new URL(location.href); return u.searchParams.get('slug') || ''; }
   const slug=getSlug();
   let data=[]; try{ data=await (await fetch('/data/torekadata.json',{cache:'no-store'})).json(); }catch(e){ alert('データ取得失敗'); return; }
   function toSlug(s){ return (s||'').toLowerCase().trim().replace(/[^\w一-龥ぁ-んァ-ヶ]+/g,'-').replace(/^-+|-+$/g,''); }
@@ -55,8 +53,8 @@
   const roi=item.roi?Number(item.roi): (n(item.avgBuyTotal)&&n(item.boxPrice)? n(item.avgBuyTotal)/n(item.boxPrice):0);
   const roiPct=(roi*100).toFixed(1)+'%';
   const ev=n(item.packEV).toLocaleString();
-  const boxImg = item.affiliateImage || '';
-  const aff = item.affiliateUrl ? `<a href="${item.affiliateUrl}" target="_blank" rel="nofollow noopener sponsored" class="badge ml-2">PR</a>`:''
+  const boxImg=item.affiliateImage || '';
+  const aff=item.affiliateUrl ? `<a href="${item.affiliateUrl}" target="_blank" rel="nofollow noopener sponsored" class="badge ml-2">PR</a>` : '';
 
   document.getElementById('pgTitle').textContent = `${item.boxName} | トレカ期待値チェッカー β`;
   document.getElementById('boxCard').innerHTML = `
@@ -65,7 +63,7 @@
       <div>
         <h1 class="text-2xl font-bold">${item.boxName}${aff}</h1>
         <div class="text-sm text-gray-600">${item.game||''}${item.releaseDate?'｜'+item.releaseDate:''}</div>
-        <div class="text-xs text-gray-500 mt-1">/og/box/${encodeURIComponent(slug)} がSNS共有カードになります</div>
+        <div class="text-xs text-gray-500 mt-1">${WORKER_BASE}/og/box/${encodeURIComponent(slug)} がSNS共有カードです</div>
       </div>
     </div>
   `;
@@ -76,11 +74,27 @@
     <div class="border rounded p-3"><div class="text-gray-500 text-sm">回収率</div><div class="text-xl font-semibold">${roiPct}</div></div>
   `;
 
-  /* 共有 */
-  const pageUrl=location.origin + `/box/${encodeURIComponent(slug)}`;
+  const pageUrl=location.href;
   document.getElementById('share-line').href=`https://line.me/R/msg/text/?${encodeURIComponent(item.boxName+'\n'+pageUrl)}`;
   document.getElementById('share-x').href=`https://x.com/intent/tweet?text=${encodeURIComponent(item.boxName)}&url=${encodeURIComponent(pageUrl)}`;
-  document.getElementById('share-img').href=`/og/box/${encodeURIComponent(slug)}`;
+  document.getElementById('share-img').href=`${WORKER_BASE}/og/box/${encodeURIComponent(slug)}`;
+
+  /* JSON-LD を動的挿入（SEO/AEO） */
+  const ld = {
+    "@context":"https://schema.org",
+    "@type":"Product",
+    "name": item.boxName,
+    "category":"Trading Card Game Box",
+    "brand": item.game || "TCG",
+    "releaseDate": item.releaseDate || "",
+    "offers":{"@type":"AggregateOffer","priceCurrency":"JPY","lowPrice": String(item.boxPrice||""), "highPrice": String(item.boxPrice||"")},
+    "additionalProperty":[
+      {"@type":"PropertyValue","name":"回収率","value": roiPct},
+      {"@type":"PropertyValue","name":"1パック期待値","value": String(item.packEV||"")}
+    ],
+    "url": location.href
+  };
+  const s=document.createElement('script'); s.type='application/ld+json'; s.textContent=JSON.stringify(ld); document.head.appendChild(s);
 })();
 </script>
 </body>

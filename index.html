@@ -9,8 +9,9 @@
 <link rel="icon" href="assets/favicon.ico">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
 <style>
-  :root{ --brand:#2563eb; --brand-2:#60a5fa; --accent:#f59e0b; --bg:#f8fafc; }
+  :root{ --brand:#2563eb; --brand-2:#60a5fa; --accent:#f59e0b; --bg:#f8fafc; --muted:#6b7280; }
   body{ background:var(--bg); color:#111827; }
   header{ background:linear-gradient(90deg,#fff 0%,#eaf2ff 40%,#fff7e6 100%); border-bottom:1px solid #e5e7eb; }
   .title-lg{ font-size:2rem; } @media(min-width:1024px){ .title-lg{ font-size:2.25rem; } }
@@ -27,6 +28,7 @@
   .modal-card{ width:min(560px,92vw); background:#fff; border-radius:14px; border:1px solid #e5e7eb; padding:1.25rem; }
 </style>
 </head>
+
 <body>
 <header class="py-6">
   <div class="max-w-7xl mx-auto px-4 flex items-center justify-between">
@@ -39,6 +41,8 @@
 </header>
 
 <main class="max-w-7xl mx-auto px-4 py-8">
+
+  <!-- ランキング -->
   <section id="ranking" class="section mb-8">
     <div class="flex items-center justify-between mb-2">
       <h2 class="text-xl font-semibold"><span class="h-icon"><span class="h-dot" style="background:linear-gradient(135deg,#22c55e,#86efac)"></span>最新期待値ランキング</span></h2>
@@ -52,6 +56,7 @@
     <p class="text-xs text-gray-500 mt-2">※ データは参考値であり、投資助言を目的としません。価格は変動します。</p>
   </section>
 
+  <!-- PRブロック -->
   <section class="section mb-10">
     <div class="flex items-center justify-between">
       <div>
@@ -65,6 +70,7 @@
     </div>
   </section>
 
+  <!-- 全トレカ一覧（タブ） -->
   <section id="all" class="section mb-12">
     <div class="flex items-center justify-between mb-3">
       <h3 class="text-xl font-semibold"><span class="h-icon"><span class="h-dot" style="background:linear-gradient(135deg,#2563eb,#93c5fd)"></span>全トレカ一覧</span></h3>
@@ -73,16 +79,66 @@
     <table id="allTable" class="stripe hover w-full text-sm"></table>
   </section>
 
+  <!-- 自分で計算（ローカル保存対応） -->
+  <section id="calc" class="section mb-12">
+    <h3 class="text-xl font-semibold mb-4"><span class="h-icon"><span class="h-dot" style="background:linear-gradient(135deg,#a855f7,#c084fc)"></span>自分で計算する（ローカル保存可）</span></h3>
+    <div class="grid md:grid-cols-3 gap-4">
+      <label>タイトル（任意）
+        <input type="text" id="c_title" class="border p-2 w-full rounded" placeholder="例：自分用テスト計算">
+      </label>
+      <label>パック単価（円）
+        <input type="number" id="c_packPrice" class="border p-2 w-full rounded" value="200" min="0">
+      </label>
+      <label>パック数（箱）
+        <input type="number" id="c_packCount" class="border p-2 w-full rounded" value="30" min="1">
+      </label>
+    </div>
+    <div id="rarityRows" class="grid md:grid-cols-3 gap-4 mt-4"></div>
+    <div class="mt-3 flex gap-2">
+      <button id="addRarity" class="px-3 py-2 bg-gray-200 hover:bg-gray-300 rounded">＋ レアリティ追加</button>
+      <button id="calcBtn" class="px-4 py-2 text-white rounded" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);">計算する</button>
+      <button id="saveCalc" class="px-4 py-2 text-white rounded" style="background:linear-gradient(135deg,#2563eb,#60a5fa);">保存</button>
+    </div>
+    <div id="calcResult" class="mt-4 text-lg font-semibold"></div>
+
+    <div class="mt-6">
+      <h4 class="font-semibold mb-2">💾 保存履歴</h4>
+      <table id="historyTable" class="stripe hover w-full text-sm"></table>
+    </div>
+  </section>
+
+  <!-- 法務（詳細版） -->
   <section id="legal" class="section">
     <h3 class="text-xl font-semibold mb-3"><span class="h-icon"><span class="h-dot" style="background:linear-gradient(135deg,#ef4444,#fca5a5)"></span>利用規約・免責・プライバシー</span></h3>
-    <details class="mb-2" open><summary class="cursor-pointer font-medium">利用規約（要旨）</summary>
-      <p class="ml-4 mt-1 text-sm text-gray-700">本サイトは参考情報の提供を目的としており、投資助言等を行うものではありません。掲載情報の正確性・完全性・最新性を保証しません。ご利用は自己責任でお願いします。</p>
+
+    <details class="mb-2" open>
+      <summary class="cursor-pointer font-medium">利用規約（要旨）</summary>
+      <ul class="ml-6 mt-2 list-disc text-sm text-gray-700 space-y-1">
+        <li>本サイトは参考情報の提供を目的とし、投資助言・勧誘を行うものではありません。</li>
+        <li>掲載情報の正確性・完全性・最新性は保証しません。価格・相場は常に変動します。</li>
+        <li>当サイトの数値・API・ウィジェットを第三者へ提供する場合は、出典として本サイト名とURLの明示が必要です。</li>
+        <li>商用での継続的利用（再配布・有償サービス等）は事前許諾が必要です。</li>
+      </ul>
     </details>
-    <details class="mb-2"><summary class="cursor-pointer font-medium">免責事項</summary>
-      <p class="ml-4 mt-1 text-sm text-gray-700">価格・相場は変動します。外部サイトの仕様変更・アクセス障害・情報遅延等により生じたいかなる損害についても当方は責任を負いません。</p>
+
+    <details class="mb-2">
+      <summary class="cursor-pointer font-medium">免責事項</summary>
+      <ul class="ml-6 mt-2 list-disc text-sm text-gray-700 space-y-1">
+        <li>外部サイトの仕様変更・通信障害・情報遅延等に起因する損害について、当方は一切の責任を負いません。</li>
+        <li>試算結果は推計値です。実際の開封結果・買取条件等により乖離する場合があります。</li>
+        <li>ユーザー投稿・アップロード機能（将来提供予定）での投稿内容は投稿者の責任であり、違法・第三者の権利侵害が判明した場合は削除します。</li>
+      </ul>
     </details>
-    <details><summary class="cursor-pointer font-medium">プライバシーポリシー</summary>
-      <p class="ml-4 mt-1 text-sm text-gray-700">本サイトは利用状況の把握のため解析ツールを使用する場合があります。Cookie等が利用されることがあり、同意の上ご利用ください。投稿機能（将来提供予定）では、投稿者の同意に基づきデータを取り扱います。</p>
+
+    <details>
+      <summary class="cursor-pointer font-medium">プライバシーポリシー</summary>
+      <ul class="ml-6 mt-2 list-disc text-sm text-gray-700 space-y-1">
+        <li>本サイトは利用状況の把握・不正防止のため解析ツール（Cookieを含む）を使用する場合があります。</li>
+        <li>Cookieはブラウザ設定により拒否できますが、一部機能（保存履歴など）が制限される場合があります。</li>
+        <li>問い合わせ・投稿等で取得した個人情報は、回答・品質改善・不正対策の目的に限って取り扱います。</li>
+        <li>APIのアクセスログ（IP一部・UserAgent等）はセキュリティ・運用目的で一定期間保存する場合があります。</li>
+      </ul>
+      <p class="ml-6 mt-2 text-xs text-gray-500">データライセンス：コンテンツは原則 CC BY-NC 4.0（非営利に限り出典表示で利用可）。商用利用は要連絡。</p>
     </details>
   </section>
 </main>
@@ -92,12 +148,16 @@
   <p class="text-xs mt-2">本ページには広告・アフィリエイトリンクを含みます（PR）。</p>
 </footer>
 
-<!-- 同意ポップアップ -->
+<!-- 同意モーダル -->
 <div id="consentModal" class="modal-backdrop" style="display:none;">
   <div class="modal-card">
     <h4 class="text-lg font-semibold mb-2">ご利用にあたってのお願い</h4>
-    <p class="text-sm text-gray-700 mb-3">本サイトは参考情報の提供を目的としており、投資助言を行うものではありません。価格は変動し、実際の相場と異なる場合があります。解析やCookieを用いることがあります。</p>
-    <label class="text-sm inline-flex items-center gap-2 mb-3"><input type="checkbox" id="consentRemember" class="border"> 次回から表示しない（この端末に保存）</label>
+    <p class="text-sm text-gray-700 mb-3">
+      本サイトは参考情報の提供を目的としており、投資助言を行うものではありません。価格は変動し、実際の相場と異なる場合があります。解析やCookieを用いることがあります。
+    </p>
+    <label class="text-sm inline-flex items-center gap-2 mb-3">
+      <input type="checkbox" id="consentRemember" class="border"> 次回から表示しない（この端末に保存）
+    </label>
     <div class="flex justify-end gap-2">
       <button id="consentCancel" class="px-3 py-2 border rounded">キャンセル</button>
       <button id="consentOK" class="px-4 py-2 text-white rounded" style="background:linear-gradient(135deg,#10b981,#34d399);">同意して進む</button>
@@ -105,33 +165,41 @@
   </div>
 </div>
 
+<!-- libs -->
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
 <script>
 (async function(){
+  /* === 設定：あなたのWorker URLに変更 === */
+  const WORKER_BASE = 'https://YOUR-WORKER.workers.dev';
+
   /* 同意 */
   const MODAL_KEY='toreka_consent_v1', modal=document.getElementById('consentModal');
   if(localStorage.getItem(MODAL_KEY)!=='1'){ modal.style.display='flex'; }
   document.getElementById('consentOK').onclick=()=>{ if(document.getElementById('consentRemember').checked){localStorage.setItem(MODAL_KEY,'1');} modal.style.display='none';};
   document.getElementById('consentCancel').onclick=()=>{ modal.style.display='none'; };
 
-  /* データ読込 */
+  /* データ読み込み */
   let raw=[]; try{ const r=await fetch('data/torekadata.json',{cache:'no-store'}); raw=await r.json(); }catch(e){ alert('データ読み込み失敗'); return; }
 
-  /* サムネ自動生成（画像URL無い時） */
+  /* 共有ボタン（ランキング用） */
+  const ttl=document.title; const topOG=`${WORKER_BASE}/og/box/top`;
+  document.getElementById('share-line').href=`https://line.me/R/msg/text/?${encodeURIComponent(ttl+'\n'+location.href)}`;
+  document.getElementById('share-x').href=`https://x.com/intent/tweet?text=${encodeURIComponent(ttl)}&url=${encodeURIComponent(location.href)}`;
+  document.getElementById('share-img').onclick=()=> window.open(topOG,'_blank');
+
+  /* サムネ自動生成 */
   function avatarFromText(text='-'){ const c=document.createElement('canvas'); c.width=112;c.height=112; const x=c.getContext('2d'); const cs=['#93c5fd','#86efac','#fcd34d','#fda4af','#c4b5fd','#a7f3d0']; x.fillStyle=cs[(text.length*7)%cs.length]; x.fillRect(0,0,112,112); x.fillStyle='#0f172a'; x.font='bold 34px system-ui'; x.textAlign='center'; x.textBaseline='middle'; const t=(text||'TC').replace(/[^A-Za-z0-9一-龥ぁ-んァ-ヶ]/g,'').slice(0,2).toUpperCase()||'TC'; x.fillText(t,56,56); return c.toDataURL('image/png'); }
-
-  /* ゲーム名マップ */
   const gameMap={ygo:'遊戯王',YGO:'遊戯王',pkm:'ポケカ',PKM:'ポケカ',ws:'ヴァイス',WS:'ヴァイス',dm:'デュエマ',DM:'デュエマ',mtg:'MTG',MTG:'MTG'};
-
-  /* 整形 */
   function toSlug(s){ return (s||'').toLowerCase().trim().replace(/[^\w一-龥ぁ-んァ-ヶ]+/g,'-').replace(/^-+|-+$/g,''); }
+
   const data = raw.filter(d=>d&&(d.boxName||'').trim()!=='').map(d=>{
     const n=x=>(x==null||x===''||isNaN(Number(x)))?0:Number(x);
     const roi=d.roi?Number(d.roi):((n(d.avgBuyTotal)&&n(d.boxPrice))?n(d.avgBuyTotal)/n(d.boxPrice):0);
-    const slug=d.slug||toSlug(d.boxName);
-    return {...d,
-      slug,
+    return {
+      ...d,
+      slug: d.slug || toSlug(d.boxName),
       game: gameMap[d.game] || (d.game||''),
       releaseDate: d.releaseDate||'',
       boxPrice:n(d.boxPrice), avgBuyTotal:n(d.avgBuyTotal), packEV:n(d.packEV),
@@ -145,10 +213,10 @@
   const rankCols=[
     { title:"商品", data:null, render:(_,__,row)=>{
         const img=`<img src="${row.affiliateImage}" alt="${row.boxName}" class="thumb">`;
-        const title=`<a href="/box/${encodeURIComponent(row.slug)}" class="text-blue-700 underline">${row.boxName||'-'}</a>`;
+        const link=`<a href="/box.html?slug=${encodeURIComponent(row.slug)}" class="text-blue-700 underline">${row.boxName||'-'}</a>`;
         const pr=row.affiliateUrl?`<a class="badge ml-2" href="${row.affiliateUrl}" target="_blank" rel="nofollow noopener sponsored">PR</a>`:'';
         const sub=`${row.game||''}${row.releaseDate?'｜'+row.releaseDate:''}`;
-        return `<div class="flex items-center gap-3">${img}<div><div class="font-medium">${title}${pr}</div><div class="text-xs text-gray-500">${sub}</div></div></div>`;
+        return `<div class="flex items-center gap-3">${img}<div><div class="font-medium">${link}${pr}</div><div class="text-xs text-gray-500">${sub}</div></div></div>`;
     }},
     { title:"発売", data:"releaseDate" },
     { title:"箱(円)", data:"boxPrice", render:v=>Number(v||0).toLocaleString() },
@@ -164,7 +232,7 @@
   function top3(){ $(rankingDT.rows().nodes()).removeClass('is-top'); rankingDT.rows({order:'applied'}).indexes().toArray().slice(0,3).forEach(i=>$(rankingDT.row(i).node()).addClass('is-top')); }
   rankingDT.on('draw', top3); top3();
 
-  /* 一覧タブ */
+  /* 全トレカ一覧タブ */
   const games = Array.from(new Set(data.map(d=>d.game).filter(Boolean)));
   const tabs=document.getElementById('gameTabs'); function mkBtn(t){const b=document.createElement('button'); b.className='px-3 py-1 rounded border text-sm bg-white'; b.textContent=t; b.onclick=()=>setFilter(t); return b;}
   tabs.appendChild(mkBtn('すべて')); games.forEach(g=>tabs.appendChild(mkBtn(g)));
@@ -173,7 +241,7 @@
       { title:"ゲーム", data:"game" },
       { title:"商品", data:null, render:(_,__,row)=>{
           const img=`<img src="${row.affiliateImage}" alt="${row.boxName}" class="thumb">`;
-          const link=`<a href="/box/${encodeURIComponent(row.slug)}" class="text-blue-700 underline">${row.boxName||'-'}</a>`;
+          const link=`<a href="/box.html?slug=${encodeURIComponent(row.slug)}" class="text-blue-700 underline">${row.boxName||'-'}</a>`;
           const pr=row.affiliateUrl?`<a class="badge ml-2" href="${row.affiliateUrl}" target="_blank" rel="nofollow noopener sponsored">PR</a>`:'';
           return `<div class="flex items-center gap-3">${img}<div><div class="font-medium">${link}${pr}</div><div class="text-xs text-gray-500">${row.releaseDate||''}</div></div></div>`;
       }},
@@ -188,11 +256,68 @@
   function setFilter(label){ if(label==='すべて'){ allDT.column(0).search('').draw(); }else{ allDT.column(0).search('^'+label+'$',true,false).draw(); } }
   setFilter('すべて');
 
-  /* 共有ボタン */
-  const ttl=document.title; const url=location.origin+location.pathname;
-  document.getElementById('share-line').href=`https://line.me/R/msg/text/?${encodeURIComponent(ttl+'\n'+url)}`;
-  document.getElementById('share-x').href=`https://x.com/intent/tweet?text=${encodeURIComponent(ttl)}&url=${encodeURIComponent(url)}`;
-  document.getElementById('share-img').onclick=()=>{ window.open('/og/box/top','_blank'); };
+  /* 自分で計算 */
+  const rarityRows=document.getElementById('rarityRows'); let rarityCount=0;
+  function addRarity(avg=0, cpb=0){
+    if(rarityCount>=6)return;
+    rarityCount++;
+    const wrap=document.createElement('div');
+    wrap.className='border rounded p-3 bg-white';
+    wrap.innerHTML=`
+      <div class="font-medium mb-2">レア${rarityCount}</div>
+      <label class="block text-sm">平均買取（円）
+        <input type="number" class="r-avg border p-2 w-full mt-1 rounded" value="${avg}">
+      </label>
+      <label class="block text-sm mt-2">封入数（枚）
+        <input type="number" class="r-cpb border p-2 w-full mt-1 rounded" value="${cpb}">
+      </label>
+      <button type="button" class="mt-2 text-xs text-red-600 underline remove">削除</button>
+    `;
+    wrap.querySelector('.remove').addEventListener('click',()=>{ rarityRows.removeChild(wrap); rarityCount--; });
+    rarityRows.appendChild(wrap);
+  }
+  addRarity(900,3); addRarity(450,6);
+  document.getElementById('addRarity').onclick=()=>addRarity();
+
+  function calcNow(){
+    const n=v=> (v===''||v==null||isNaN(Number(v)))?0:Number(v);
+    const price=n(document.getElementById('c_packPrice').value);
+    const count=Math.max(1,n(document.getElementById('c_packCount').value));
+    const box=price*count;
+    let ev=0;
+    rarityRows.querySelectorAll('.border').forEach(boxEl=>{
+      ev += n(boxEl.querySelector('.r-avg').value) * n(boxEl.querySelector('.r-cpb').value);
+    });
+    const packEV=Math.round(ev/count);
+    const roi=box?ev/box:0, roiPct=(roi*100).toFixed(1)+'%';
+    document.getElementById('calcResult').textContent=`箱価格：${box.toLocaleString()}円 ／ 期待値合計：${ev.toLocaleString()}円 ／ 1パック期待値：${packEV.toLocaleString()}円 ／ 回収率：${roiPct}`;
+    return {boxPrice:box, ev, packEV, roi, roiPct};
+  }
+  document.getElementById('calcBtn').onclick=calcNow;
+
+  const STORAGE_KEY='toreka_calc_history_v1';
+  const hisDT=$('#historyTable').DataTable({
+    data:[], columns:[
+      { title:"タイトル", data:"title" },
+      { title:"箱価格", data:"boxPrice", render:v=>Number(v||0).toLocaleString() },
+      { title:"期待値合計", data:"ev", render:v=>Number(v||0).toLocaleString() },
+      { title:"1パック期待値", data:"packEV", render:v=>Number(v||0).toLocaleString() },
+      { title:"回収率（％）", data:"roiPct" },
+      { title:"保存日時", data:"savedAt" }
+    ],
+    pageLength:5, autoWidth:false, scrollX:true,
+    language:{ url:"//cdn.datatables.net/plug-ins/1.13.6/i18n/ja.json" }
+  });
+  function loadHistory(){ try{ const arr=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); hisDT.clear().rows.add(arr).draw(); }catch{} }
+  loadHistory();
+  document.getElementById('saveCalc').onclick=()=>{
+    const title=(document.getElementById('c_title').value||'未タイトル').trim();
+    const now=calcNow();
+    const rec={ title, boxPrice:now.boxPrice, ev:now.ev, packEV:now.packEV, roi:now.roi, roiPct:now.roiPct, savedAt:new Date().toLocaleString() };
+    const arr=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); arr.unshift(rec);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(arr.slice(0,100)));
+    loadHistory(); alert('保存しました（この端末のブラウザに保存されます）');
+  };
 })();
 </script>
 </body>

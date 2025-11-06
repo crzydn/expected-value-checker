@@ -41,7 +41,7 @@
 
 <script>
 (async function(){
-  const WORKER_BASE = 'https://YOUR-WORKER.workers.dev';
+  const WORKER_BASE = 'https://evchecker.crzydn.workers.dev/';
   function getSlug(){ const u=new URL(location.href); return u.searchParams.get('slug') || ''; }
   const slug=getSlug();
   let data=[]; try{ data=await (await fetch('/data/torekadata.json',{cache:'no-store'})).json(); }catch(e){ alert('データ取得失敗'); return; }
@@ -99,3 +99,4 @@
 </script>
 </body>
 </html>
+

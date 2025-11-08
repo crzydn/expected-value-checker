@@ -22,9 +22,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title id="pgTitle">BOX詳細 | トレカ期待値チェッカー β</title>
   <meta name="description" content="ボックスの回収率と1パック期待値の詳細。">
-  <!-- 相対解決（サブパス運用でも壊れない） -->
+  <!-- サブパス対応のため相対指定 -->
   <link rel="icon" href="assets/favicon.ico">
-
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
   <style>
     .badge{ display:inline-block; padding:.15rem .45rem; border-radius:.4rem; background:#fff3cd; color:#92400e; font-size:.75rem; border:1px solid #ffe69c; }
@@ -38,14 +37,13 @@
 
   <header class="py-6 border-b bg-white">
     <div class="max-w-5xl mx-auto px-4 flex items-center justify-between">
-      <!-- ルート相対をやめ、baseURIで解決 -->
       <a id="backLink" class="font-bold" href="#">← ランキングへ</a>
       <span class="badge">PRを含みます</span>
     </div>
   </header>
 
   <main class="max-w-5xl mx-auto px-4 py-8">
-    <div id="boxCard" class="bg-white rounded-xl border p-5 shadow-sm"></div>
+    <div id="boxCard" class="bg-white rounded-xl border p-5 shadow-sm">読み込み中…</div>
 
     <section class="mt-8 bg-white rounded-xl border p-5 shadow-sm">
       <h2 class="text-xl font-semibold mb-3">価格・期待値</h2>
@@ -68,16 +66,17 @@
 
   <script>
   (async function(){
-    /* === 設定 === */
+    /* === 固定設定 === */
     const WORKER_BASE = 'https://evchecker.crzydn.workers.dev';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbx7RDcfaJ-K-QAywCmRI4p88ZtHwRHUahR381yOkWb3l048A1qFAuxztupA3MRKGMEN5w/exec';
 
-    /* パス解決（GitHub PagesのサブパスでもOK） */
-    const base = new URL('./', document.baseURI); // 例: https://crzydn.github.io/expected-value-checker/
+    /* サブパスでも戻るリンクが正しく動くように */
+    const base = new URL('./', document.baseURI);
     document.getElementById('backLink').href = new URL('./', base).href;
 
-    /* 共通関数 */
-    function toSlug(s){ return (s||'').toLowerCase().trim().replace(/[^\w一-龥ぁ-んァ-ヶ]+/g,'-').replace(/^-+|-+$/g,''); }
+    /* util */
     const n = v => (v==null || v==='') ? 0 : Number(v);
+    function toSlug(s){ return (s||'').toLowerCase().trim().replace(/[^\w一-龥ぁ-んァ-ヶ]+/g,'-').replace(/^-+|-+$/g,''); }
     function avatarFromText(text='-'){
       const c=document.createElement('canvas'); c.width=176; c.height=176;
       const x=c.getContext('2d'); const cs=['#93c5fd','#86efac','#fcd34d','#fda4af','#c4b5fd','#a7f3d0'];
@@ -88,33 +87,23 @@
     }
 
     /* クエリから slug 取得 */
-    const params = new URL(location.href).searchParams;
-    const slug = params.get('slug') || '';
+    const slug = new URL(location.href).searchParams.get('slug') || '';
 
-    /* データ取得
-       - JSON を /data/ から取得（サブパスでも壊れないよう baseURI で解決）
-       - 失敗時は GAS をフォールバック（任意）
-    */
+    /* ===== データ取得（GAS 直取り）===== */
     let rows = [];
     try{
-      const jsonUrl = new URL('data/torekadata.json', base).href;
-      const res = await fetch(jsonUrl, {cache:'no-store'});
+      const res = await fetch(GAS_URL, { cache:'no-store' });
+      if(!res.ok) throw new Error('HTTP '+res.status);
       rows = await res.json();
       if(!Array.isArray(rows)) rows = [];
     }catch(e){
-      console.warn('JSON取得失敗、GASへフォールバックします', e);
-      try{
-        const gas = 'https://script.google.com/macros/s/AKfycbx7RDcfaJ-K-QAywCmRI4p88ZtHwRHUahR381yOkWb3l048A1qFAuxztupA3MRKGMEN5w/exec';
-        const res2 = await fetch(gas, {cache:'no-store'});
-        rows = await res2.json();
-        if(!Array.isArray(rows)) rows = [];
-      }catch(e2){
-        document.getElementById('boxCard').innerHTML = '<p>データ取得に失敗しました。</p>';
-        return;
-      }
+      document.getElementById('boxCard').innerHTML =
+        '<p class="text-red-600">データ取得に失敗しました。時間をおいて再読み込みしてください。</p>';
+      console.error(e);
+      return;
     }
 
-    /* slug で1件抽出（slugが無いデータはboxNameから生成） */
+    /* 対象1件抽出（slugが無い行はboxNameから生成） */
     const item = rows.map(d=>({...d, slug:(d.slug||toSlug(d.boxName))}))
                      .find(d=>d.slug===slug);
 
@@ -133,18 +122,18 @@
       ? `<a href="${item.affiliateUrl}" target="_blank" rel="nofollow noopener sponsored" class="badge ml-2">PR</a>`
       : '';
 
-    /* タイトル/OGを動的更新（AEO/SEO強化） */
+    /* タイトル/メタ更新（AEO/SEO） */
     const title = `${item.boxName} | トレカ期待値チェッカー β`;
+    const desc  = `${item.boxName} の期待値詳細（1P期待値：${packEVStr}円／回収率：${roiPct}）。`;
     document.title = title;
-    const desc = `${item.boxName} の期待値詳細（1P期待値：${packEVStr}円／回収率：${roiPct}）。`;
-    function setMeta(p, c){ let m=document.querySelector(`meta[property="${p}"]`); if(!m){ m=document.createElement('meta'); m.setAttribute('property',p); document.head.appendChild(m);} m.setAttribute('content',c); }
-    function setName(nm, c){ let m=document.querySelector(`meta[name="${nm}"]`); if(!m){ m=document.createElement('meta'); m.setAttribute('name',nm); document.head.appendChild(m);} m.setAttribute('content',c); }
-    setName('description', desc);
-    setMeta('og:title', title);
-    setMeta('og:description', desc);
-    setMeta('og:image', `${WORKER_BASE}/og/box/${encodeURIComponent(slug)}`);
+    function setMetaName(nm, c){ let m=document.querySelector(`meta[name="${nm}"]`); if(!m){ m=document.createElement('meta'); m.setAttribute('name',nm); document.head.appendChild(m);} m.setAttribute('content',c); }
+    function setMetaProp(p, c){ let m=document.querySelector(`meta[property="${p}"]`); if(!m){ m=document.createElement('meta'); m.setAttribute('property',p); document.head.appendChild(m);} m.setAttribute('content',c); }
+    setMetaName('description', desc);
+    setMetaProp('og:title', title);
+    setMetaProp('og:description', desc);
+    setMetaProp('og:image', `${WORKER_BASE}/og/box/${encodeURIComponent(slug)}`);
 
-    /* 上部カード */
+    /* 上部カード描画 */
     document.getElementById('boxCard').innerHTML = `
       <div class="flex items-center gap-4">
         <img src="${boxImg}" alt="${item.boxName}" class="thumb" loading="lazy">
@@ -156,7 +145,7 @@
       </div>
     `;
 
-    /* スタッツ */
+    /* スタッツ描画 */
     document.getElementById('stats').innerHTML = `
       <div class="border rounded p-3">
         <div class="text-gray-500 text-sm">箱価格</div>
@@ -176,7 +165,7 @@
       </div>
     `;
 
-    /* 共有 */
+    /* 共有リンク */
     const pageUrl = location.href;
     document.getElementById('share-line').href =
       `https://line.me/R/msg/text/?${encodeURIComponent(item.boxName+'\n'+pageUrl)}`;

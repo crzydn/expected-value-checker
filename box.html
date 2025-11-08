@@ -2,121 +2,213 @@
 <html lang="ja">
 <head>
   <!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-NJM338K4');</script>
-<!-- End Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-NJM338K4');</script>
+  <!-- End Google Tag Manager -->
+
+  <!-- Microsoft Clarity -->
   <script type="text/javascript">
     (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
     })(window, document, "clarity", "script", "u1pta894yu");
-</script>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title id="pgTitle">BOX詳細 | トレカ期待値チェッカー β</title>
-<meta name="description" content="ボックスの回収率と1パック期待値の詳細。">
-<link rel="icon" href="/assets/favicon.ico">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
-<style>
-  .badge{ display:inline-block; padding:.15rem .45rem; border-radius:.4rem; background:#fff3cd; color:#92400e; font-size:.75rem; border:1px solid #ffe69c; }
-  .thumb{ width:88px; height:88px; object-fit:cover; border-radius:.6rem; border:1px solid #e5e7eb; background:#f1f5f9; }
-</style>
+  </script>
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title id="pgTitle">BOX詳細 | トレカ期待値チェッカー β</title>
+  <meta name="description" content="ボックスの回収率と1パック期待値の詳細。">
+  <!-- 相対解決（サブパス運用でも壊れない） -->
+  <link rel="icon" href="assets/favicon.ico">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <style>
+    .badge{ display:inline-block; padding:.15rem .45rem; border-radius:.4rem; background:#fff3cd; color:#92400e; font-size:.75rem; border:1px solid #ffe69c; }
+    .thumb{ width:88px; height:88px; object-fit:cover; border-radius:.6rem; border:1px solid #e5e7eb; background:#f1f5f9; }
+  </style>
 </head>
 <body class="bg-gray-50 text-gray-900">
   <!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NJM338K4"
-height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- End Google Tag Manager (noscript) -->
-<header class="py-6 border-b bg-white">
-  <div class="max-w-5xl mx-auto px-4 flex items-center justify-between">
-    <a href="/" class="font-bold">← ランキングへ</a>
-    <span class="badge">PRを含みます</span>
-  </div>
-</header>
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NJM338K4"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
-<main class="max-w-5xl mx-auto px-4 py-8">
-  <div id="boxCard" class="bg-white rounded-xl border p-5 shadow-sm"></div>
-  <section class="mt-8 bg-white rounded-xl border p-5 shadow-sm">
-    <h2 class="text-xl font-semibold mb-3">価格・期待値</h2>
-    <div id="stats" class="grid sm:grid-cols-2 gap-4"></div>
-  </section>
-  <section class="mt-8 bg-white rounded-xl border p-5 shadow-sm">
-    <h3 class="text-lg font-semibold mb-3">共有</h3>
-    <div class="flex gap-2">
-      <a id="share-line" class="px-3 py-2 rounded text-white" style="background:#06C755">LINEで共有</a>
-      <a id="share-x" class="px-3 py-2 rounded text-white" style="background:#000">Xで共有</a>
-      <a id="share-img" class="px-3 py-2 rounded text-white" style="background:linear-gradient(135deg,#111827,#4b5563)">画像DL</a>
+  <header class="py-6 border-b bg-white">
+    <div class="max-w-5xl mx-auto px-4 flex items-center justify-between">
+      <!-- ルート相対をやめ、baseURIで解決 -->
+      <a id="backLink" class="font-bold" href="#">← ランキングへ</a>
+      <span class="badge">PRを含みます</span>
     </div>
-  </section>
-  <section class="mt-8 text-xs text-gray-500">
-    <p>※ 本ページは参考情報であり、投資助言ではありません。価格は変動します。</p>
-  </section>
-</main>
+  </header>
 
-<script>
-(async function(){
-  const WORKER_BASE = 'https://evchecker.crzydn.workers.dev';
-  function getSlug(){ const u=new URL(location.href); return u.searchParams.get('slug') || ''; }
-  const slug=getSlug();
-  let data=[]; try{ data=await (await fetch('/data/torekadata.json',{cache:'no-store'})).json(); }catch(e){ alert('データ取得失敗'); return; }
-  function toSlug(s){ return (s||'').toLowerCase().trim().replace(/[^\w一-龥ぁ-んァ-ヶ]+/g,'-').replace(/^-+|-+$/g,''); }
-  const item=data.map(d=>({...d, slug:(d.slug||toSlug(d.boxName))})).find(d=>d.slug===slug);
-  if(!item){ document.getElementById('boxCard').innerHTML='<p>該当データが見つかりませんでした。</p>'; return; }
+  <main class="max-w-5xl mx-auto px-4 py-8">
+    <div id="boxCard" class="bg-white rounded-xl border p-5 shadow-sm"></div>
 
-  const n=v=>Number(v||0);
-  const roi=item.roi?Number(item.roi): (n(item.avgBuyTotal)&&n(item.boxPrice)? n(item.avgBuyTotal)/n(item.boxPrice):0);
-  const roiPct=(roi*100).toFixed(1)+'%';
-  const ev=n(item.packEV).toLocaleString();
-  const boxImg=item.affiliateImage || '';
-  const aff=item.affiliateUrl ? `<a href="${item.affiliateUrl}" target="_blank" rel="nofollow noopener sponsored" class="badge ml-2">PR</a>` : '';
+    <section class="mt-8 bg-white rounded-xl border p-5 shadow-sm">
+      <h2 class="text-xl font-semibold mb-3">価格・期待値</h2>
+      <div id="stats" class="grid sm:grid-cols-2 gap-4"></div>
+    </section>
 
-  document.getElementById('pgTitle').textContent = `${item.boxName} | トレカ期待値チェッカー β`;
-  document.getElementById('boxCard').innerHTML = `
-    <div class="flex items-center gap-4">
-      <img src="${boxImg}" alt="${item.boxName}" class="thumb">
-      <div>
-        <h1 class="text-2xl font-bold">${item.boxName}${aff}</h1>
-        <div class="text-sm text-gray-600">${item.game||''}${item.releaseDate?'｜'+item.releaseDate:''}</div>
-        <div class="text-xs text-gray-500 mt-1">${WORKER_BASE}/og/box/${encodeURIComponent(slug)} がSNS共有カードです</div>
+    <section class="mt-8 bg-white rounded-xl border p-5 shadow-sm">
+      <h3 class="text-lg font-semibold mb-3">共有</h3>
+      <div class="flex gap-2">
+        <a id="share-line" class="px-3 py-2 rounded text-white" style="background:#06C755">LINEで共有</a>
+        <a id="share-x" class="px-3 py-2 rounded text-white" style="background:#000">Xで共有</a>
+        <a id="share-img" class="px-3 py-2 rounded text-white" style="background:linear-gradient(135deg,#111827,#4b5563)">画像DL</a>
       </div>
-    </div>
-  `;
-  document.getElementById('stats').innerHTML = `
-    <div class="border rounded p-3"><div class="text-gray-500 text-sm">箱価格</div><div class="text-xl font-semibold">${n(item.boxPrice).toLocaleString()} 円</div></div>
-    <div class="border rounded p-3"><div class="text-gray-500 text-sm">期待値合計</div><div class="text-xl font-semibold">${n(item.avgBuyTotal).toLocaleString()} 円</div></div>
-    <div class="border rounded p-3"><div class="text-gray-500 text-sm">1パック期待値</div><div class="text-xl font-semibold">${ev} 円</div></div>
-    <div class="border rounded p-3"><div class="text-gray-500 text-sm">回収率</div><div class="text-xl font-semibold">${roiPct}</div></div>
-  `;
+    </section>
 
-  const pageUrl=location.href;
-  document.getElementById('share-line').href=`https://line.me/R/msg/text/?${encodeURIComponent(item.boxName+'\n'+pageUrl)}`;
-  document.getElementById('share-x').href=`https://x.com/intent/tweet?text=${encodeURIComponent(item.boxName)}&url=${encodeURIComponent(pageUrl)}`;
-  document.getElementById('share-img').href=`${WORKER_BASE}/og/box/${encodeURIComponent(slug)}`;
+    <section class="mt-8 text-xs text-gray-500">
+      <p>※ 本ページは参考情報であり、投資助言ではありません。価格は変動します。</p>
+    </section>
+  </main>
 
-  /* JSON-LD を動的挿入（SEO/AEO） */
-  const ld = {
-    "@context":"https://schema.org",
-    "@type":"Product",
-    "name": item.boxName,
-    "category":"Trading Card Game Box",
-    "brand": item.game || "TCG",
-    "releaseDate": item.releaseDate || "",
-    "offers":{"@type":"AggregateOffer","priceCurrency":"JPY","lowPrice": String(item.boxPrice||""), "highPrice": String(item.boxPrice||"")},
-    "additionalProperty":[
-      {"@type":"PropertyValue","name":"回収率","value": roiPct},
-      {"@type":"PropertyValue","name":"1パック期待値","value": String(item.packEV||"")}
-    ],
-    "url": location.href
-  };
-  const s=document.createElement('script'); s.type='application/ld+json'; s.textContent=JSON.stringify(ld); document.head.appendChild(s);
-})();
-</script>
+  <script>
+  (async function(){
+    /* === 設定 === */
+    const WORKER_BASE = 'https://evchecker.crzydn.workers.dev';
+
+    /* パス解決（GitHub PagesのサブパスでもOK） */
+    const base = new URL('./', document.baseURI); // 例: https://crzydn.github.io/expected-value-checker/
+    document.getElementById('backLink').href = new URL('./', base).href;
+
+    /* 共通関数 */
+    function toSlug(s){ return (s||'').toLowerCase().trim().replace(/[^\w一-龥ぁ-んァ-ヶ]+/g,'-').replace(/^-+|-+$/g,''); }
+    const n = v => (v==null || v==='') ? 0 : Number(v);
+    function avatarFromText(text='-'){
+      const c=document.createElement('canvas'); c.width=176; c.height=176;
+      const x=c.getContext('2d'); const cs=['#93c5fd','#86efac','#fcd34d','#fda4af','#c4b5fd','#a7f3d0'];
+      x.fillStyle=cs[(text.length*7)%cs.length]; x.fillRect(0,0,176,176);
+      x.fillStyle='#0f172a'; x.font='bold 64px system-ui'; x.textAlign='center'; x.textBaseline='middle';
+      const t=(text||'TC').replace(/[^A-Za-z0-9一-龥ぁ-んァ-ヶ]/g,'').slice(0,2).toUpperCase()||'TC';
+      x.fillText(t,88,96); return c.toDataURL('image/png');
+    }
+
+    /* クエリから slug 取得 */
+    const params = new URL(location.href).searchParams;
+    const slug = params.get('slug') || '';
+
+    /* データ取得
+       - JSON を /data/ から取得（サブパスでも壊れないよう baseURI で解決）
+       - 失敗時は GAS をフォールバック（任意）
+    */
+    let rows = [];
+    try{
+      const jsonUrl = new URL('data/torekadata.json', base).href;
+      const res = await fetch(jsonUrl, {cache:'no-store'});
+      rows = await res.json();
+      if(!Array.isArray(rows)) rows = [];
+    }catch(e){
+      console.warn('JSON取得失敗、GASへフォールバックします', e);
+      try{
+        const gas = 'https://script.google.com/macros/s/AKfycbx7RDcfaJ-K-QAywCmRI4p88ZtHwRHUahR381yOkWb3l048A1qFAuxztupA3MRKGMEN5w/exec';
+        const res2 = await fetch(gas, {cache:'no-store'});
+        rows = await res2.json();
+        if(!Array.isArray(rows)) rows = [];
+      }catch(e2){
+        document.getElementById('boxCard').innerHTML = '<p>データ取得に失敗しました。</p>';
+        return;
+      }
+    }
+
+    /* slug で1件抽出（slugが無いデータはboxNameから生成） */
+    const item = rows.map(d=>({...d, slug:(d.slug||toSlug(d.boxName))}))
+                     .find(d=>d.slug===slug);
+
+    if(!item){
+      document.getElementById('boxCard').innerHTML = '<p>該当データが見つかりませんでした。</p>';
+      return;
+    }
+
+    /* 値整形 */
+    const roi = item.roi ? Number(item.roi)
+                         : (n(item.avgBuyTotal) && n(item.boxPrice) ? n(item.avgBuyTotal)/n(item.boxPrice) : 0);
+    const roiPct = (roi*100).toFixed(1) + '%';
+    const packEVStr = n(item.packEV).toLocaleString();
+    const boxImg = item.affiliateImage || avatarFromText(item.boxName||'-');
+    const aff = item.affiliateUrl
+      ? `<a href="${item.affiliateUrl}" target="_blank" rel="nofollow noopener sponsored" class="badge ml-2">PR</a>`
+      : '';
+
+    /* タイトル/OGを動的更新（AEO/SEO強化） */
+    const title = `${item.boxName} | トレカ期待値チェッカー β`;
+    document.title = title;
+    const desc = `${item.boxName} の期待値詳細（1P期待値：${packEVStr}円／回収率：${roiPct}）。`;
+    function setMeta(p, c){ let m=document.querySelector(`meta[property="${p}"]`); if(!m){ m=document.createElement('meta'); m.setAttribute('property',p); document.head.appendChild(m);} m.setAttribute('content',c); }
+    function setName(nm, c){ let m=document.querySelector(`meta[name="${nm}"]`); if(!m){ m=document.createElement('meta'); m.setAttribute('name',nm); document.head.appendChild(m);} m.setAttribute('content',c); }
+    setName('description', desc);
+    setMeta('og:title', title);
+    setMeta('og:description', desc);
+    setMeta('og:image', `${WORKER_BASE}/og/box/${encodeURIComponent(slug)}`);
+
+    /* 上部カード */
+    document.getElementById('boxCard').innerHTML = `
+      <div class="flex items-center gap-4">
+        <img src="${boxImg}" alt="${item.boxName}" class="thumb" loading="lazy">
+        <div>
+          <h1 class="text-2xl font-bold">${item.boxName}${aff}</h1>
+          <div class="text-sm text-gray-600">${item.game||''}${item.releaseDate?'｜'+item.releaseDate:''}</div>
+          <div class="text-xs text-gray-500 mt-1 break-all">${WORKER_BASE}/og/box/${encodeURIComponent(slug)}（共有画像URL）</div>
+        </div>
+      </div>
+    `;
+
+    /* スタッツ */
+    document.getElementById('stats').innerHTML = `
+      <div class="border rounded p-3">
+        <div class="text-gray-500 text-sm">箱価格</div>
+        <div class="text-xl font-semibold">${n(item.boxPrice).toLocaleString()} 円</div>
+      </div>
+      <div class="border rounded p-3">
+        <div class="text-gray-500 text-sm">期待値合計</div>
+        <div class="text-xl font-semibold">${n(item.avgBuyTotal).toLocaleString()} 円</div>
+      </div>
+      <div class="border rounded p-3">
+        <div class="text-gray-500 text-sm">1パック期待値</div>
+        <div class="text-xl font-semibold">${packEVStr} 円</div>
+      </div>
+      <div class="border rounded p-3">
+        <div class="text-gray-500 text-sm">回収率</div>
+        <div class="text-xl font-semibold">${roiPct}</div>
+      </div>
+    `;
+
+    /* 共有 */
+    const pageUrl = location.href;
+    document.getElementById('share-line').href =
+      `https://line.me/R/msg/text/?${encodeURIComponent(item.boxName+'\n'+pageUrl)}`;
+    document.getElementById('share-x').href =
+      `https://x.com/intent/tweet?text=${encodeURIComponent(item.boxName)}&url=${encodeURIComponent(pageUrl)}`;
+    document.getElementById('share-img').href =
+      `${WORKER_BASE}/og/box/${encodeURIComponent(slug)}`;
+
+    /* JSON-LD（構造化データ） */
+    const ld = {
+      "@context":"https://schema.org",
+      "@type":"Product",
+      "name": item.boxName,
+      "category":"Trading Card Game Box",
+      "brand": item.game || "TCG",
+      "releaseDate": item.releaseDate || "",
+      "offers":{
+        "@type":"AggregateOffer",
+        "priceCurrency":"JPY",
+        "lowPrice": String(item.boxPrice||""),
+        "highPrice": String(item.boxPrice||"")
+      },
+      "additionalProperty":[
+        {"@type":"PropertyValue","name":"回収率","value": roiPct},
+        {"@type":"PropertyValue","name":"1パック期待値","value": String(item.packEV||"")}
+      ],
+      "url": location.href,
+      "image": `${WORKER_BASE}/og/box/${encodeURIComponent(slug)}`
+    };
+    const s=document.createElement('script'); s.type='application/ld+json';
+    s.textContent = JSON.stringify(ld); document.head.appendChild(s);
+  })();
+  </script>
 </body>
 </html>
-
-
-

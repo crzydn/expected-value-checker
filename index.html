@@ -228,7 +228,7 @@
     /* データ読み込み（GAS失敗時は空配列で継続） */
     let rows = [];
     try{
-      const res = await fetch('https://script.google.com/macros/s/AKfycbxHsa-OX0zuFcM4kcBFmKHmQMMT2GiVHSg6ZzlpROQGG_hIkp4aNWJG_sDQbbAjFwPxuw/exec',{cache:'no-store'});
+      const res = await fetch('https://script.google.com/macros/s/AKfycbyEUt3s8ChXE2KrrQB9P8c6aHCsSVCv08WchjWHkjSPBvvcWccs4DXU4wR1ozKHuVRpVw/exec',{cache:'no-store'});
       rows = await res.json();
       if(!Array.isArray(rows)) rows = [];
     }catch(e){
@@ -379,4 +379,5 @@
   </script>
 </body>
 </html>
+
 

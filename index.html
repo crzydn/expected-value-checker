@@ -199,7 +199,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   document.getElementById('consentCancel').onclick=()=>{ modal.style.display='none'; };
 
   /* データ読み込み */
-  const rows = await fetch('<<https://script.google.com/macros/s/AKfycbx7RDcfaJ-K-QAywCmRI4p88ZtHwRHUahR381yOkWb3l048A1qFAuxztupA3MRKGMEN5w/exec>>',{cache:'no-store'}).then(r=>r.json());
+  const rows = await fetch('https://script.google.com/macros/s/AKfycbx7RDcfaJ-K-QAywCmRI4p88ZtHwRHUahR381yOkWb3l048A1qFAuxztupA3MRKGMEN5w/exec',{cache:'no-store'}).then(r=>r.json());
 
   /* 共有ボタン（ランキング用） */
   const ttl=document.title; const topOG=`${WORKER_BASE}/og/box/top`;
@@ -340,6 +340,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </script>
 </body>
 </html>
+
 
 
 

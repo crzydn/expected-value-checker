@@ -68,7 +68,7 @@
   (async function(){
     /* === 固定設定 === */
     const WORKER_BASE = 'https://evchecker.crzydn.workers.dev';
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbyEUt3s8ChXE2KrrQB9P8c6aHCsSVCv08WchjWHkjSPBvvcWccs4DXU4wR1ozKHuVRpVw/exec';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbybBRm73Z91mvLtc2LITac5gn4Re1renApti0xwDVtVuv344XYA5poem2R7mrAFSPKV/exec';
 
     /* サブパスでも戻るリンクが正しく動くように */
     const base = new URL('./', document.baseURI);
@@ -92,7 +92,7 @@
     /* ===== データ取得（GAS 直取り）===== */
     let rows = [];
     try{
-      const res = await fetch(https://script.google.com/macros/s/AKfycbxHsa-OX0zuFcM4kcBFmKHmQMMT2GiVHSg6ZzlpROQGG_hIkp4aNWJG_sDQbbAjFwPxuw/exec, { cache:'no-store' });
+      const res = await fetch(https://script.google.com/macros/s/AKfycbybBRm73Z91mvLtc2LITac5gn4Re1renApti0xwDVtVuv344XYA5poem2R7mrAFSPKV/exec, { cache:'no-store' });
       if(!res.ok) throw new Error('HTTP '+res.status);
       rows = await res.json();
       if(!Array.isArray(rows)) rows = [];
@@ -201,5 +201,6 @@
   </script>
 </body>
 </html>
+
 
 

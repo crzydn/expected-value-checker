@@ -11,11 +11,10 @@
 
   <!-- Microsoft Clarity -->
   <script type="text/javascript">
-    (function(c,l,a,r,i,t,y){
-      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    })(window, document, "clarity", "script", "u1pta894yu");
+    (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window, document,
+    "clarity", "script", "u1pta894yu");
   </script>
 
   <meta charset="utf-8" />
@@ -23,48 +22,25 @@
   <title>トレカ期待値チェッカー β｜主要トレカの期待値ランキング</title>
   <meta name="description" content="遊戯王・ポケカ・ヴァイス・デュエマなど主要トレカのボックス期待値を自動集計。平均買取から回収率と1パック期待値を計算してランキング表示。">
   <meta name="robots" content="index,follow">
-
-  <!-- SEO / AEO -->
-  <link rel="canonical" href="https://crzydn.github.io/expected-value-checker/">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="トレカ期待値チェッカー β">
-  <meta property="og:title" content="トレカ期待値チェッカー β｜主要トレカの期待値ランキング">
-  <meta property="og:description" content="主要トレカのボックス期待値を自動集計。回収率・1パック期待値で比較。">
-  <meta property="og:image" content="https://evchecker.crzydn.workers.dev/og/box/top">
-  <meta name="twitter:card" content="summary_large_image">
-  <script type="application/ld+json">
-  {
-    "@context":"https://schema.org",
-    "@type":"WebSite",
-    "name":"トレカ期待値チェッカー β",
-    "url":"https://crzydn.github.io/expected-value-checker/",
-    "potentialAction":{
-      "@type":"SearchAction",
-      "target":"https://crzydn.github.io/expected-value-checker/?q={search_term_string}",
-      "query-input":"required name=search_term_string"
-    }
-  }
-  </script>
-
   <link rel="icon" href="assets/favicon.ico">
+
+  <!-- UI / DataTables -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 
   <style>
-    :root{ --brand:#2563eb; --brand-2:#60a5fa; --accent:#f59e0b; --bg:#f8fafc; --muted:#6b7280; }
+    :root{ --brand:#2563eb; --brand2:#60a5fa; --accent:#f59e0b; --bg:#f8fafc; --muted:#6b7280; }
     body{ background:var(--bg); color:#111827; }
     header{ background:linear-gradient(90deg,#fff 0%,#eaf2ff 40%,#fff7e6 100%); border-bottom:1px solid #e5e7eb; }
     .title-lg{ font-size:2rem; } @media(min-width:1024px){ .title-lg{ font-size:2.25rem; } }
     .h-icon{ display:inline-flex; align-items:center; gap:.5rem; }
-    .h-dot{ width:28px; height:28px; border-radius:8px; background:linear-gradient(135deg,var(--brand),var(--brand-2)); }
+    .h-dot{ width:28px; height:28px; border-radius:8px; background:linear-gradient(135deg,var(--brand),var(--brand2)); }
     .badge{ display:inline-block; padding:.15rem .45rem; border-radius:.4rem; background:#fff3cd; color:#92400e; font-size:.75rem; border:1px solid #ffe69c; }
     .thumb{ width:56px; height:56px; object-fit:cover; border-radius:.6rem; border:1px solid #e5e7eb; background:#f1f5f9; }
     .section{ background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:1.25rem; }
     .dt-container .dataTables_filter input{ border:1px solid #cbd5e1; }
     table.dataTable thead th, table.dataTable tbody td{ white-space:nowrap; }
     .dt-container{ overflow-x:auto; }
-    table.dataTable tbody td { padding: .9rem .8rem; } /* PC視認性 */
-    @media (min-width: 1200px){ .dt-container { overflow-x: visible; } }
     .is-top{ background:linear-gradient(180deg,#fffbe6,#fff7cc); box-shadow:inset 0 0 0 2px var(--accent); }
     .modal-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.35); display:flex; align-items:center; justify-content:center; z-index:60; }
     .modal-card{ width:min(560px,92vw); background:#fff; border-radius:14px; border:1px solid #e5e7eb; padding:1.25rem; }
@@ -72,7 +48,7 @@
 </head>
 
 <body>
-  <!-- Google Tag Manager (noscript) -->
+  <!-- GTM noscript -->
   <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NJM338K4" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <header class="py-6">
@@ -86,7 +62,6 @@
   </header>
 
   <main class="max-w-7xl mx-auto px-4 py-8">
-
     <!-- ランキング -->
     <section id="ranking" class="section mb-8">
       <div class="flex items-center justify-between mb-2">
@@ -162,7 +137,7 @@
           <li>本サイトは参考情報の提供を目的とし、投資助言・勧誘を行うものではありません。</li>
           <li>掲載情報の正確性・完全性・最新性は保証しません。価格・相場は常に変動します。</li>
           <li>当サイトの数値・API・ウィジェットを第三者へ提供する場合は、出典として本サイト名とURLの明示が必要です。</li>
-          <li>商用での継続的利用（再配布・有償サービス等）は事前許諾が必要です。（連絡先：サイト運営者Xまたはメール）</li>
+          <li>商用での継続的利用（再配布・有償サービス等）は事前許諾が必要です。</li>
         </ul>
       </details>
 
@@ -178,10 +153,10 @@
       <details>
         <summary class="cursor-pointer font-medium">プライバシーポリシー</summary>
         <ul class="ml-6 mt-2 list-disc text-sm text-gray-700 space-y-1">
-          <li>本サイトは利用状況の把握・不正防止のために Cookie を使用し、解析として <b>Google タグマネージャー</b>（Google Analytics を含む場合があります）および <b>Microsoft Clarity</b> を利用することがあります。</li>
+          <li>本サイトは利用状況の把握・不正防止のため解析ツール（Cookieを含む）を使用する場合があります。</li>
           <li>Cookieはブラウザ設定により拒否できますが、一部機能（保存履歴など）が制限される場合があります。</li>
           <li>問い合わせ・投稿等で取得した個人情報は、回答・品質改善・不正対策の目的に限って取り扱います。</li>
-          <li>APIのアクセスログ（IP一部・UserAgent等）はセキュリティ・運用目的で一定期間保存する場合があります。</li>
+          <li>APIアクセスログ（IP一部・UserAgent等）はセキュリティ・運用目的で一定期間保存する場合があります。</li>
         </ul>
         <p class="ml-6 mt-2 text-xs text-gray-500">データライセンス：コンテンツは原則 CC BY-NC 4.0（非営利に限り出典表示で利用可）。商用利用は要連絡。</p>
       </details>
@@ -216,25 +191,40 @@
 
   <script>
   (async function(){
-    /* === 設定 === */
+    /* ========= 設定（ここだけ直せばOK） ========= */
+    // B案：?sheet= を常に付けて読みます（GAS 側 doGet は ?sheet= 対応版を想定）
+    const GAS_URL   = 'https://script.google.com/macros/s/AKfycbybBRm73Z91mvLtc2LITac5gn4Re1renApti0xwDVtVuv344XYA5poem2R7mrAFSPKV/exec';
+    const SHEET_NAME= 'トレカ期待値入力';
     const WORKER_BASE = 'https://evchecker.crzydn.workers.dev';
 
-    /* 同意 */
+    /* 同意モーダル */
     const MODAL_KEY='toreka_consent_v1', modal=document.getElementById('consentModal');
     if(localStorage.getItem(MODAL_KEY)!=='1'){ modal.style.display='flex'; }
     document.getElementById('consentOK').onclick=()=>{ if(document.getElementById('consentRemember').checked){localStorage.setItem(MODAL_KEY,'1');} modal.style.display='none';};
     document.getElementById('consentCancel').onclick=()=>{ modal.style.display='none'; };
 
-    /* データ読み込み（GAS失敗時は空配列で継続） */
-    let rows = [];
-    try{
-      const res = await fetch('https://script.google.com/macros/s/AKfycbybBRm73Z91mvLtc2LITac5gn4Re1renApti0xwDVtVuv344XYA5poem2R7mrAFSPKV/exec',{cache:'no-store'});
-      rows = await res.json();
-      if(!Array.isArray(rows)) rows = [];
-    }catch(e){
-      console.warn('データ取得に失敗しました。空で続行します。', e);
-      rows = [];
-    }
+    /* データ読み込み */
+    const payload = await fetch(`${GAS_URL}?sheet=${encodeURIComponent(SHEET_NAME)}&ts=${Date.now()}`, {cache:'no-store'})
+      .then(r => { if(!r.ok) throw new Error('GAS HTTP '+r.status); return r.json(); })
+      .catch(e => { console.error(e); alert('データ取得に失敗しました'); return {data:[]}; });
+
+    const raw = Array.isArray(payload) ? payload : (payload.data || []);
+    function toSlug(s){ return (s||'').toLowerCase().trim().replace(/[^\w一-龥ぁ-んァ-ヶ]+/g,'-').replace(/^-+|-+$/g,''); }
+    const gameMap={ygo:'遊戯王',YGO:'遊戯王',pkm:'ポケカ',PKM:'ポケカ',ws:'ヴァイス',WS:'ヴァイス',dm:'デュエマ',DM:'デュエマ',mtg:'MTG',MTG:'MTG'};
+
+    const data = raw.filter(x=>x && (x.boxName||'').trim()!=='').map(d=>{
+      const n=x=> (x==null||x===''||isNaN(Number(String(x).replace(/[¥,]/g,''))))?0:Number(String(x).replace(/[¥,]/g,''));
+      const roi=d.roi?Number(d.roi):((n(d.avgBuyTotal)&&n(d.boxPrice))?n(d.avgBuyTotal)/n(d.boxPrice):0);
+      return {
+        ...d,
+        slug: d.slug || toSlug(d.boxName),
+        game: gameMap[d.game] || (d.game||''),
+        boxPrice:n(d.boxPrice), avgBuyTotal:n(d.avgBuyTotal), packEV:n(d.packEV),
+        roi, roi_pct: d.roi_pct || (roi? (roi*100).toFixed(1)+'%':'' ),
+        affiliateImage: d.affiliateImage || '',
+        affiliateUrl: d.affiliateUrl || ''
+      };
+    });
 
     /* 共有ボタン */
     const ttl=document.title; const topOG=`${WORKER_BASE}/og/box/top`;
@@ -242,36 +232,12 @@
     document.getElementById('share-x').href=`https://x.com/intent/tweet?text=${encodeURIComponent(ttl)}&url=${encodeURIComponent(location.href)}`;
     document.getElementById('share-img').onclick=()=> window.open(topOG,'_blank');
 
-    /* ユーティリティ */
-    function avatarFromText(text='-'){ const c=document.createElement('canvas'); c.width=112;c.height=112; const x=c.getContext('2d'); const cs=['#93c5fd','#86efac','#fcd34d','#fda4af','#c4b5fd','#a7f3d0']; x.fillStyle=cs[(text.length*7)%cs.length]; x.fillRect(0,0,112,112); x.fillStyle='#0f172a'; x.font='bold 34px system-ui'; x.textAlign='center'; x.textBaseline='middle'; const t=(text||'TC').replace(/[^A-Za-z0-9一-龥ぁ-んァ-ヶ]/g,'').slice(0,2).toUpperCase()||'TC'; x.fillText(t,56,56); return c.toDataURL('image/png'); }
-    const gameMap={ygo:'遊戯王',YGO:'遊戯王',pkm:'ポケカ',PKM:'ポケカ',ws:'ヴァイス',WS:'ヴァイス',dm:'デュエマ',DM:'デュエマ',mtg:'MTG',MTG:'MTG'};
-    function toSlug(s){ return (s||'').toLowerCase().trim().replace(/[^\w一-龥ぁ-んァ-ヶ]+/g,'-').replace(/^-+|-+$/g,''); }
-    const n = v => (v===''||v==null||isNaN(Number(v))) ? 0 : Number(v);
-
-    /* rows → data へ整形 */
-    const data = rows.filter(d=>d&&(d.boxName||'').trim()!=='').map(d=>{
-      const roi = d.roi ? Number(d.roi) : ((n(d.avgBuyTotal)&&n(d.boxPrice)) ? n(d.avgBuyTotal)/n(d.boxPrice) : 0);
-      return {
-        ...d,
-        slug: d.slug || toSlug(d.boxName),
-        game: gameMap[d.game] || (d.game||''),
-        releaseDate: d.releaseDate || '',
-        boxPrice: n(d.boxPrice),
-        avgBuyTotal: n(d.avgBuyTotal),
-        packEV: n(d.packEV),
-        roi,
-        roi_pct: d.roi_pct || (roi ? (roi*100).toFixed(1)+'%' : ''),
-        affiliateImage: d.affiliateImage || avatarFromText(d.boxName||'-'),
-        affiliateUrl: d.affiliateUrl || ''
-      };
-    });
-
     /* ランキング */
     const rankCols=[
       { title:"商品", data:null, render:(_,__,row)=>{
-          const img=`<img src="${row.affiliateImage}" alt="${row.boxName}" class="thumb" loading="lazy">`;
+          const img = row.affiliateImage ? `<img src="${row.affiliateImage}" alt="${row.boxName}" class="thumb">` : `<div class="thumb"></div>`;
           const link=`<a href="/box.html?slug=${encodeURIComponent(row.slug)}" class="text-blue-700 underline">${row.boxName||'-'}</a>`;
-          const pr=row.affiliateUrl?`<a class="badge ml-2" href="${row.affiliateUrl}" target="_blank" rel="nofollow noopener sponsored" aria-label="アフィリエイトリンク">PR</a>`:'';
+          const pr=row.affiliateUrl?`<a class="badge ml-2" href="${row.affiliateUrl}" target="_blank" rel="nofollow noopener sponsored">PR</a>`:'';
           const sub=`${row.game||''}${row.releaseDate?'｜'+row.releaseDate:''}`;
           return `<div class="flex items-center gap-3">${img}<div><div class="font-medium">${link}${pr}</div><div class="text-xs text-gray-500">${sub}</div></div></div>`;
       }},
@@ -289,7 +255,7 @@
     function top3(){ $(rankingDT.rows().nodes()).removeClass('is-top'); rankingDT.rows({order:'applied'}).indexes().toArray().slice(0,3).forEach(i=>$(rankingDT.row(i).node()).addClass('is-top')); }
     rankingDT.on('draw', top3); top3();
 
-    /* 全トレカ一覧（タブ切替） */
+    /* 全トレカ一覧 */
     const games = Array.from(new Set(data.map(d=>d.game).filter(Boolean)));
     const tabs=document.getElementById('gameTabs'); function mkBtn(t){const b=document.createElement('button'); b.className='px-3 py-1 rounded border text-sm bg-white'; b.textContent=t; b.onclick=()=>setFilter(t); return b;}
     tabs.appendChild(mkBtn('すべて')); games.forEach(g=>tabs.appendChild(mkBtn(g)));
@@ -297,9 +263,9 @@
       data, columns:[
         { title:"ゲーム", data:"game" },
         { title:"商品", data:null, render:(_,__,row)=>{
-            const img=`<img src="${row.affiliateImage}" alt="${row.boxName}" class="thumb" loading="lazy">`;
+            const img=row.affiliateImage?`<img src="${row.affiliateImage}" alt="${row.boxName}" class="thumb">`:`<div class="thumb"></div>`;
             const link=`<a href="/box.html?slug=${encodeURIComponent(row.slug)}" class="text-blue-700 underline">${row.boxName||'-'}</a>`;
-            const pr=row.affiliateUrl?`<a class="badge ml-2" href="${row.affiliateUrl}" target="_blank" rel="nofollow noopener sponsored" aria-label="アフィリエイトリンク">PR</a>`:'';
+            const pr=row.affiliateUrl?`<a class="badge ml-2" href="${row.affiliateUrl}" target="_blank" rel="nofollow noopener sponsored">PR</a>`:'';
             return `<div class="flex items-center gap-3">${img}<div><div class="font-medium">${link}${pr}</div><div class="text-xs text-gray-500">${row.releaseDate||''}</div></div></div>`;
         }},
         { title:"箱(円)", data:"boxPrice", render:v=>Number(v||0).toLocaleString() },
@@ -313,9 +279,9 @@
     function setFilter(label){ if(label==='すべて'){ allDT.column(0).search('').draw(); }else{ allDT.column(0).search('^'+label+'$',true,false).draw(); } }
     setFilter('すべて');
 
-    /* 自分で計算（ローカル保存） */
+    /* 自分で計算 */
     const rarityRows=document.getElementById('rarityRows'); let rarityCount=0;
-    function addRarity(avg=0, cpb=0){
+    function addRarity(avg=900, cpb=3){
       if(rarityCount>=6)return;
       rarityCount++;
       const wrap=document.createElement('div');
@@ -328,8 +294,7 @@
         <label class="block text-sm mt-2">封入数（枚）
           <input type="number" class="r-cpb border p-2 w-full mt-1 rounded" value="${cpb}">
         </label>
-        <button type="button" class="mt-2 text-xs text-red-600 underline remove">削除</button>
-      `;
+        <button type="button" class="mt-2 text-xs text-red-600 underline remove">削除</button>`;
       wrap.querySelector('.remove').addEventListener('click',()=>{ rarityRows.removeChild(wrap); rarityCount--; });
       rarityRows.appendChild(wrap);
     }
@@ -337,13 +302,13 @@
     document.getElementById('addRarity').onclick=()=>addRarity();
 
     function calcNow(){
-      const num=v=> (v===''||v==null||isNaN(Number(v)))?0:Number(v);
-      const price=num(document.getElementById('c_packPrice').value);
-      const count=Math.max(1,num(document.getElementById('c_packCount').value));
+      const n=v=> (v===''||v==null||isNaN(Number(v)))?0:Number(v);
+      const price=n(document.getElementById('c_packPrice').value);
+      const count=Math.max(1,n(document.getElementById('c_packCount').value));
       const box=price*count;
       let ev=0;
       rarityRows.querySelectorAll('.border').forEach(boxEl=>{
-        ev += num(boxEl.querySelector('.r-avg').value) * num(boxEl.querySelector('.r-cpb').value);
+        ev += n(boxEl.querySelector('.r-avg').value) * n(boxEl.querySelector('.r-cpb').value);
       });
       const packEV=Math.round(ev/count);
       const roi=box?ev/box:0, roiPct=(roi*100).toFixed(1)+'%';
@@ -379,6 +344,3 @@
   </script>
 </body>
 </html>
-
-
-

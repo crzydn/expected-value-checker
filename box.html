@@ -1,22 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <!-- Google Tag Manager -->
-  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-  })(window,document,'script','dataLayer','GTM-NJM338K4');</script>
-  <!-- End Google Tag Manager -->
-
-  <!-- Microsoft Clarity -->
-  <script type="text/javascript">
-    (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window, document,
-    "clarity", "script", "u1pta894yu");
-  </script>
-
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title id="pgTitle">BOX詳細 | トレカ期待値チェッカー β</title>
@@ -29,90 +13,93 @@
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900">
-  <!-- GTM noscript -->
-  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NJM338K4"
-  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
-  <header class="py-6 border-b bg-white">
-    <div class="max-w-5xl mx-auto px-4 flex items-center justify-between">
-      <a href="/" class="font-bold">← ランキングへ</a>
-      <span class="badge">PRを含みます</span>
+<header class="py-6 border-b bg-white">
+  <div class="max-w-5xl mx-auto px-4 flex items-center justify-between">
+    <a href="/" class="font-bold">← ランキングへ</a>
+    <span class="badge">PRを含みます</span>
+  </div>
+</header>
+
+<main class="max-w-5xl mx-auto px-4 py-8">
+  <div id="boxCard" class="bg-white rounded-xl border p-5 shadow-sm"></div>
+  <section class="mt-8 bg-white rounded-xl border p-5 shadow-sm">
+    <h2 class="text-xl font-semibold mb-3">価格・期待値</h2>
+    <div id="stats" class="grid sm:grid-cols-2 gap-4"></div>
+  </section>
+  <section class="mt-8 bg-white rounded-xl border p-5 shadow-sm">
+    <h3 class="text-lg font-semibold mb-3">共有</h3>
+    <div class="flex gap-2">
+      <a id="share-line" class="px-3 py-2 rounded text-white" style="background:#06C755">LINEで共有</a>
+      <a id="share-x" class="px-3 py-2 rounded text-white" style="background:#000">Xで共有</a>
+      <a id="share-img" class="px-3 py-2 rounded text-white" style="background:linear-gradient(135deg,#111827,#4b5563)">画像DL</a>
     </div>
-  </header>
-
-  <main class="max-w-5xl mx-auto px-4 py-8">
-    <div id="boxCard" class="bg-white rounded-xl border p-5 shadow-sm"></div>
-    <section class="mt-8 bg-white rounded-xl border p-5 shadow-sm">
-      <h2 class="text-xl font-semibold mb-3">価格・期待値</h2>
-      <div id="stats" class="grid sm:grid-cols-2 gap-4"></div>
-    </section>
-    <section class="mt-8 bg-white rounded-xl border p-5 shadow-sm">
-      <h3 class="text-lg font-semibold mb-3">共有</h3>
-      <div class="flex gap-2">
-        <a id="share-line" class="px-3 py-2 rounded text-white" style="background:#06C755">LINEで共有</a>
-        <a id="share-x" class="px-3 py-2 rounded text-white" style="background:#000">Xで共有</a>
-        <a id="share-img" class="px-3 py-2 rounded text-white" style="background:linear-gradient(135deg,#111827,#4b5563)">画像DL</a>
-      </div>
-    </section>
-    <section class="mt-8 text-xs text-gray-500">
-      <p>※ 本ページは参考情報であり、投資助言ではありません。価格は変動します。</p>
-    </section>
-  </main>
+  </section>
+  <section class="mt-8 text-xs text-gray-500">
+    <p>※ 本ページは参考情報であり、投資助言ではありません。価格は変動します。</p>
+  </section>
+</main>
 
 <script>
 (async function(){
-  /* 設定（index と同じに） */
-  const GAS_URL    = 'https://script.google.com/macros/s/AKfycbyFmNIEpl29mmq2s3pNnpSOSFovZOtebj-RvgnUwDY_mqnkM8wNHhXvuM32YDg7ycHqQA/exec';
+  const GAS_PROXY = 'https://evchecker.crzydn.workers.dev/gas';
   const SHEET_NAME = 'トレカ期待値入力';
-  const WORKER_BASE= 'https://evchecker.crzydn.workers.dev';
+  const WORKER_BASE = 'https://evchecker.crzydn.workers.dev';
 
-  function toSlug(s){ return (s||'').toLowerCase().trim().replace(/[^\w一-龥ぁ-んァ-ヶ]+/g,'-').replace(/^-+|-+$/g,''); }
-  const slug = new URL(location.href).searchParams.get('slug') || '';
+  const n = v => {
+    if (v === null || v === undefined) return 0;
+    if (typeof v === 'number') return v;
+    return Number(String(v).replace(/[¥,]/g,'').trim()) || 0;
+  };
+  const toSlug = s => (s||'').toLowerCase().trim().replace(/[^\w一-龥ぁ-んァ-ヶ]+/g,'-').replace(/^-+|-+$/g,'');
 
-  const payload = await fetch(`${GAS_URL}?sheet=${encodeURIComponent(SHEET_NAME)}&ts=${Date.now()}`, {cache:'no-store'})
-    .then(r=>{ if(!r.ok) throw new Error('GAS HTTP '+r.status); return r.json(); })
-    .catch(e=>{ console.error(e); return {data:[]} });
+  function getSlug(){ const u=new URL(location.href); return u.searchParams.get('slug') || ''; }
+  const slug = getSlug();
 
-  const all = Array.isArray(payload) ? payload : (payload.data || []);
-  const data = all.map(d => ({ ...d, slug: d.slug || toSlug(d.boxName) }));
-  const item = data.find(d => d.slug === slug);
+  const url = `${GAS_PROXY}?sheet=${encodeURIComponent(SHEET_NAME)}&ts=${Date.now()}`;
+  const { data=[] } = await fetch(url, { cache:'no-store' }).then(r=>r.json()).catch(e => ({data:[]}));
+  const rows = data.map(r => ({ ...r, slug: r.slug || toSlug(r.boxName) }));
 
+  const item = rows.find(r => r.slug === slug);
   if (!item) {
-    document.getElementById('boxCard').innerHTML = '<p>該当データが見つかりません。</p>';
+    document.getElementById('boxCard').innerHTML = '<p>該当データが見つかりませんでした。</p>';
     return;
   }
 
-  const n=v=>Number(String(v||0).replace(/[¥,]/g,''))||0;
-  const roi=item.roi?Number(item.roi): (n(item.avgBuyTotal)&&n(item.boxPrice)? n(item.avgBuyTotal)/n(item.boxPrice):0);
-  const roiPct=(roi*100).toFixed(1)+'%';
-  const ev=n(item.packEV).toLocaleString();
-  const boxImg=item.affiliateImage || '';
-  const aff=item.affiliateUrl ? `<a href="${item.affiliateUrl}" target="_blank" rel="nofollow noopener sponsored" class="badge ml-2">PR</a>` : '';
+  const boxPrice = n(item.boxPrice);
+  const avgBuyTotal = n(item.avgBuyTotal);
+  const packCount = n(item.packCount) || 1;
+  const packEV = item.packEV ? n(item.packEV) : Math.round(avgBuyTotal / packCount);
+  const roi = item.roi ? Number(item.roi) : (boxPrice ? avgBuyTotal / boxPrice : 0);
+  const roiPct = item.roi_pct || (roi ? (roi * 100).toFixed(1) + '%' : '');
+  const boxImg = item.affiliateImage || `https://dummyimage.com/112x112/e5e7eb/111827.png&text=${encodeURIComponent((item.boxName||'TC').slice(0,2))}`;
+  const pr = item.affiliateUrl ? `<a href="${item.affiliateUrl}" target="_blank" rel="nofollow noopener sponsored" class="badge ml-2">PR</a>` : '';
 
   document.getElementById('pgTitle').textContent = `${item.boxName} | トレカ期待値チェッカー β`;
   document.getElementById('boxCard').innerHTML = `
     <div class="flex items-center gap-4">
-      ${boxImg ? `<img src="${boxImg}" alt="${item.boxName}" class="thumb">` : `<div class="thumb"></div>`}
+      <img src="${boxImg}" alt="${item.boxName}" class="thumb">
       <div>
-        <h1 class="text-2xl font-bold">${item.boxName}${aff}</h1>
+        <h1 class="text-2xl font-bold">${item.boxName}${pr}</h1>
         <div class="text-sm text-gray-600">${item.game||''}${item.releaseDate?'｜'+item.releaseDate:''}</div>
         <div class="text-xs text-gray-500 mt-1">${WORKER_BASE}/og/box/${encodeURIComponent(slug)} がSNS共有カードです</div>
       </div>
     </div>
   `;
+
   document.getElementById('stats').innerHTML = `
-    <div class="border rounded p-3"><div class="text-gray-500 text-sm">箱価格</div><div class="text-xl font-semibold">${n(item.boxPrice).toLocaleString()} 円</div></div>
-    <div class="border rounded p-3"><div class="text-gray-500 text-sm">期待値合計</div><div class="text-xl font-semibold">${n(item.avgBuyTotal).toLocaleString()} 円</div></div>
-    <div class="border rounded p-3"><div class="text-gray-500 text-sm">1パック期待値</div><div class="text-xl font-semibold">${ev} 円</div></div>
+    <div class="border rounded p-3"><div class="text-gray-500 text-sm">箱価格</div><div class="text-xl font-semibold">${boxPrice.toLocaleString()} 円</div></div>
+    <div class="border rounded p-3"><div class="text-gray-500 text-sm">期待値合計</div><div class="text-xl font-semibold">${avgBuyTotal.toLocaleString()} 円</div></div>
+    <div class="border rounded p-3"><div class="text-gray-500 text-sm">1パック期待値</div><div class="text-xl font-semibold">${packEV.toLocaleString()} 円</div></div>
     <div class="border rounded p-3"><div class="text-gray-500 text-sm">回収率</div><div class="text-xl font-semibold">${roiPct}</div></div>
   `;
 
-  const pageUrl=location.href;
-  document.getElementById('share-line').href=`https://line.me/R/msg/text/?${encodeURIComponent(item.boxName+'\n'+pageUrl)}`;
-  document.getElementById('share-x').href=`https://x.com/intent/tweet?text=${encodeURIComponent(item.boxName)}&url=${encodeURIComponent(pageUrl)}`;
-  document.getElementById('share-img').href=`${WORKER_BASE}/og/box/${encodeURIComponent(slug)}`;
+  const pageUrl = location.href;
+  document.getElementById('share-line').href = `https://line.me/R/msg/text/?${encodeURIComponent(item.boxName + '\\n' + pageUrl)}`;
+  document.getElementById('share-x').href    = `https://x.com/intent/tweet?text=${encodeURIComponent(item.boxName)}&url=${encodeURIComponent(pageUrl)}`;
+  document.getElementById('share-img').href  = `${WORKER_BASE}/og/box/${encodeURIComponent(slug)}`;
 
-  /* JSON-LD（SEO/AEO） */
+  // JSON-LD（AEO/SEO）
   const ld = {
     "@context":"https://schema.org",
     "@type":"Product",
@@ -120,10 +107,10 @@
     "category":"Trading Card Game Box",
     "brand": item.game || "TCG",
     "releaseDate": item.releaseDate || "",
-    "offers":{"@type":"AggregateOffer","priceCurrency":"JPY","lowPrice": String(n(item.boxPrice)), "highPrice": String(n(item.boxPrice))},
+    "offers":{"@type":"AggregateOffer","priceCurrency":"JPY","lowPrice": String(boxPrice), "highPrice": String(boxPrice)},
     "additionalProperty":[
       {"@type":"PropertyValue","name":"回収率","value": roiPct},
-      {"@type":"PropertyValue","name":"1パック期待値","value": String(n(item.packEV))}
+      {"@type":"PropertyValue","name":"1パック期待値","value": String(packEV)}
     ],
     "url": location.href
   };
@@ -132,6 +119,3 @@
 </script>
 </body>
 </html>
-
-
-

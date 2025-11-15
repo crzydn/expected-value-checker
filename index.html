@@ -4,29 +4,30 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>トレカ期待値チェッカー β｜主要トレカの期待値ランキング</title>
-  <meta name="description" content="遊戯王・ポケカ・ヴァイス・デュエマなど主要トレカのボックス期待値を自動集計。平均買取から回収率と1パック期待値を計算してランキング表示。">
-  <meta name="robots" content="index,follow">
+  <meta name="description" content="遊戯王・ポケカ・ヴァイス・デュエマなど主要トレカのボックス期待値を自動集計。平均買取から回収率と1パック期待値を計算しランキング表示。">
   <link rel="icon" href="assets/favicon.ico">
+  <!-- UI libs -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
   <style>
     :root{ --brand:#2563eb; --brand2:#60a5fa; --accent:#f59e0b; --bg:#f8fafc; }
     body{ background:var(--bg); color:#111827; }
-    header{ background:linear-gradient(90deg,#fff 0%,#eaf2ff 45%,#fff7e6 100%); border-bottom:1px solid #e5e7eb; }
-    .h-dot{ width:26px; height:26px; border-radius:8px; background:linear-gradient(135deg,var(--brand),var(--brand2)); display:inline-block; margin-right:.5rem; }
-    .badge{ display:inline-block; padding:.15rem .45rem; border-radius:.4rem; background:#fff3cd; color:#92400e; font-size:.75rem; border:1px solid #ffe69c; }
-    .thumb{ width:56px; height:56px; object-fit:cover; border-radius:.6rem; border:1px solid #e5e7eb; background:#f1f5f9; }
+    header{ background:linear-gradient(90deg,#fff 0%,#eaf2ff 40%,#fff7e6 100%); border-bottom:1px solid #e5e7eb; }
+    .title-lg{ font-size:2rem; } @media(min-width:1024px){ .title-lg{ font-size:2.25rem; } }
+    .h-icon{ display:inline-flex; align-items:center; gap:.5rem; }
+    .h-dot{ width:28px; height:28px; border-radius:8px; background:linear-gradient(135deg,var(--brand),var(--brand2)); }
     .section{ background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:1.25rem; }
-    .dt-container{ overflow-x:auto; }
+    .thumb{ width:56px; height:56px; object-fit:cover; border-radius:.6rem; border:1px solid #e5e7eb; background:#f1f5f9; }
+    .badge{ display:inline-block; padding:.15rem .45rem; border-radius:.4rem; background:#fff3cd; color:#92400e; font-size:.75rem; border:1px solid #ffe69c; }
     .is-top{ background:linear-gradient(180deg,#fffbe6,#fff7cc); box-shadow:inset 0 0 0 2px var(--accent); }
+    .dt-container{ overflow-x:auto; }
   </style>
 </head>
 <body>
-
 <header class="py-6">
   <div class="max-w-7xl mx-auto px-4 flex items-center justify-between">
     <div>
-      <h1 class="text-2xl lg:text-[28px] font-extrabold"><span class="h-dot"></span>トレカ期待値チェッカー β</h1>
+      <div class="h-icon"><span class="h-dot"></span><h1 class="title-lg font-extrabold">トレカ期待値チェッカー β</h1></div>
       <p class="mt-1 text-sm text-gray-600">回収率と1パック期待値を比較（遊戯王・ポケカ・ヴァイス・デュエマ）</p>
     </div>
     <span class="hidden lg:inline-block badge">PRを含みます</span>
@@ -34,21 +35,21 @@
 </header>
 
 <main class="max-w-7xl mx-auto px-4 py-8">
+
   <!-- ランキング -->
-  <section class="section mb-8">
+  <section id="ranking" class="section mb-8">
     <div class="flex items-center justify-between mb-2">
-      <h2 class="text-xl font-semibold"><span class="h-dot" style="background:linear-gradient(135deg,#22c55e,#86efac)"></span>最新期待値ランキング</h2>
+      <h2 class="text-xl font-semibold"><span class="h-icon"><span class="h-dot" style="background:linear-gradient(135deg,#22c55e,#86efac)"></span>最新期待値ランキング</span></h2>
       <div class="flex gap-2">
         <a id="share-line" class="px-3 py-2 rounded text-white" style="background:#06C755">LINEで共有</a>
         <a id="share-x" class="px-3 py-2 rounded text-white" style="background:#000">Xで共有</a>
-        <button id="share-img" class="px-3 py-2 rounded text-white" style="background:linear-gradient(135deg,#111827,#4b5563)">画像DL</button>
       </div>
     </div>
     <table id="rankingTable" class="stripe hover w-full text-sm"></table>
     <p class="text-xs text-gray-500 mt-2">※ データは参考値であり、投資助言を目的としません。価格は変動します。</p>
   </section>
 
-  <!-- PR -->
+  <!-- PRブロック -->
   <section class="section mb-10">
     <div class="flex items-center justify-between">
       <div>
@@ -56,26 +57,80 @@
         <div class="text-xs text-gray-500">アフィリエイトリンクを含みます</div>
       </div>
       <div class="flex gap-3">
-        <a href="https://a.r10.to/hRBtGE" target="_blank" rel="nofollow noopener sponsored"
-           class="px-3 py-2 rounded text-white" style="background:linear-gradient(135deg,#f59e0b,#fcd34d);">楽天</a>
-        <a href="https://amzn.asia/d/dlhRiS7" target="_blank" rel="nofollow noopener sponsored"
-           class="px-3 py-2 rounded text-white" style="background:linear-gradient(135deg,#111827,#4b5563);">Amazon</a>
+        <a id="pr-rakuten" href="#" target="_blank" rel="nofollow noopener sponsored" class="px-3 py-2 rounded text-white" style="background:linear-gradient(135deg,#f59e0b,#fcd34d);">楽天</a>
+        <a id="pr-amazon" href="#" target="_blank" rel="nofollow noopener sponsored" class="px-3 py-2 rounded text-white" style="background:linear-gradient(135deg,#111827,#4b5563);">Amazon</a>
       </div>
     </div>
   </section>
 
-  <!-- 全一覧 -->
-  <section class="section mb-12">
+  <!-- 全トレカ一覧 -->
+  <section id="all" class="section mb-12">
     <div class="flex items-center justify-between mb-3">
-      <h3 class="text-xl font-semibold"><span class="h-dot" style="background:linear-gradient(135deg,#2563eb,#93c5fd)"></span>全トレカ一覧</h3>
+      <h3 class="text-xl font-semibold"><span class="h-icon"><span class="h-dot" style="background:linear-gradient(135deg,#2563eb,#93c5fd)"></span>全トレカ一覧</span></h3>
       <div id="gameTabs" class="flex gap-2"></div>
     </div>
     <table id="allTable" class="stripe hover w-full text-sm"></table>
   </section>
+
+  <!-- 自分で計算 -->
+  <section id="calc" class="section mb-12">
+    <h3 class="text-xl font-semibold mb-4"><span class="h-icon"><span class="h-dot" style="background:linear-gradient(135deg,#a855f7,#c084fc)"></span>自分で計算する（ローカル保存可）</span></h3>
+    <div class="grid md:grid-cols-3 gap-4">
+      <label>タイトル（任意）
+        <input type="text" id="c_title" class="border p-2 w-full rounded" placeholder="例：自分用テスト計算">
+      </label>
+      <label>パック単価（円）
+        <input type="number" id="c_packPrice" class="border p-2 w-full rounded" value="200" min="0">
+      </label>
+      <label>パック数（箱）
+        <input type="number" id="c_packCount" class="border p-2 w-full rounded" value="30" min="1">
+      </label>
+    </div>
+    <div id="rarityRows" class="grid md:grid-cols-3 gap-4 mt-4"></div>
+    <div class="mt-3 flex gap-2">
+      <button id="addRarity" class="px-3 py-2 bg-gray-200 hover:bg-gray-300 rounded">＋ レアリティ追加</button>
+      <button id="calcBtn" class="px-4 py-2 text-white rounded" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);">計算する</button>
+      <button id="saveCalc" class="px-4 py-2 text-white rounded" style="background:linear-gradient(135deg,#2563eb,#60a5fa);">保存</button>
+    </div>
+    <div id="calcResult" class="mt-4 text-lg font-semibold"></div>
+
+    <div class="mt-6">
+      <h4 class="font-semibold mb-2">💾 保存履歴</h4>
+      <table id="historyTable" class="stripe hover w-full text-sm"></table>
+    </div>
+  </section>
+
+  <!-- 法務 -->
+  <section id="legal" class="section">
+    <h3 class="text-xl font-semibold mb-3"><span class="h-icon"><span class="h-dot" style="background:linear-gradient(135deg,#ef4444,#fca5a5)"></span>利用規約・免責・プライバシー</span></h3>
+    <details class="mb-2" open>
+      <summary class="cursor-pointer font-medium">利用規約（要旨）</summary>
+      <ul class="ml-6 mt-2 list-disc text-sm text-gray-700 space-y-1">
+        <li>本サイトは参考情報の提供を目的とし、投資助言・勧誘を行うものではありません。</li>
+        <li>掲載情報の正確性・最新性は保証しません。価格・相場は常に変動します。</li>
+        <li>当サイトの数値やAPIを第三者に提供する場合は出典（サイト名・URL）の明示が必要です。</li>
+        <li>商用での継続的利用（再配布・有償サービス等）は事前許諾が必要です。</li>
+      </ul>
+    </details>
+    <details class="mb-2">
+      <summary class="cursor-pointer font-medium">免責事項</summary>
+      <ul class="ml-6 mt-2 list-disc text-sm text-gray-700 space-y-1">
+        <li>外部サイトの仕様変更・通信障害・情報遅延等に起因する損害について、当方は責任を負いません。</li>
+        <li>試算結果は推計値であり、実際条件により乖離します。</li>
+      </ul>
+    </details>
+    <details>
+      <summary class="cursor-pointer font-medium">プライバシーポリシー</summary>
+      <ul class="ml-6 mt-2 list-disc text-sm text-gray-700 space-y-1">
+        <li>利用状況把握のため解析ツール（Cookie含む）を使用する場合があります。</li>
+        <li>Cookieを拒否すると一部機能（保存履歴など）が制限される場合があります。</li>
+      </ul>
+    </details>
+  </section>
 </main>
 
 <footer class="text-center text-gray-600 text-sm py-6 mt-12">
-  <p>© 2025 トレカ期待値チェッカー β | データ参考: CardRush / トレコロ / メルカリ / yugioh-starter.com</p>
+  <p>© 2025 トレカ期待値チェッカー β | 参考: CardRush / トレコロ / メルカリ / yugioh-starter.com</p>
   <p class="text-xs mt-2">本ページには広告・アフィリエイトリンクを含みます（PR）。</p>
 </footer>
 
@@ -85,52 +140,67 @@
 
 <script>
 (async function(){
-  // === 設定 ===
-  const GAS_PROXY = 'https://evchecker.crzydn.workers.dev/gas'; // ← あなたのWorker
-  const SHEET_NAME = 'トレカ期待値入力';
+  /* ====== ここだけあなたのURLに変更 ====== */
   const WORKER_BASE = 'https://evchecker.crzydn.workers.dev';
+  const SHEET_NAME  = 'トレカ期待値入力'; // シートタブ名
+  /* ===================================== */
 
   // 共有ボタン
-  const ttl = document.title;
-  document.getElementById('share-line').href = `https://line.me/R/msg/text/?${encodeURIComponent(ttl + '\\n' + location.href)}`;
-  document.getElementById('share-x').href    = `https://x.com/intent/tweet?text=${encodeURIComponent(ttl)}&url=${encodeURIComponent(location.href)}`;
-  document.getElementById('share-img').onclick = () => window.open(`${WORKER_BASE}/og/box/top`, '_blank');
+  document.getElementById('share-line').href = `https://line.me/R/msg/text/?${encodeURIComponent(document.title+'\n'+location.href)}`;
+  document.getElementById('share-x').href    = `https://x.com/intent/tweet?text=${encodeURIComponent(document.title)}&url=${encodeURIComponent(location.href)}`;
 
-  // Helper
-  const gameMap = { ygo:'遊戯王', YGO:'遊戯王', pkm:'ポケカ', PKM:'ポケカ', ws:'ヴァイス', WS:'ヴァイス', dm:'デュエマ', DM:'デュエマ', mtg:'MTG', MTG:'MTG' };
-  const n = v => {
-    if (v === null || v === undefined) return 0;
-    if (typeof v === 'number') return v;
-    return Number(String(v).replace(/[¥,]/g,'').trim()) || 0;
-  };
-  const toSlug = s => (s||'').toLowerCase().trim().replace(/[^\w一-龥ぁ-んァ-ヶ]+/g,'-').replace(/^-+|-+$/g,'');
+  // データ取得
+  let rows=[];
+  try{
+    const res = await fetch(`${WORKER_BASE}/gas?sheet=${encodeURIComponent(SHEET_NAME)}&ts=${Date.now()}`, {cache:'no-store'});
+    const json = await res.json();
+    rows = (json && json.data) || [];
+  }catch(e){
+    alert('データ取得に失敗しました'); return;
+  }
 
-  // 取得
-  const url = `${GAS_PROXY}?sheet=${encodeURIComponent(SHEET_NAME)}&ts=${Date.now()}`;
-  const json = await fetch(url, { cache:'no-store' }).then(r => r.json()).catch(e => (alert('データ取得に失敗しました'), {data:[]}));
-  const raw = json.data || [];
+  // 正規化
+  const gameMap={ygo:'遊戯王',YGO:'遊戯王',pkm:'ポケカ',PKM:'ポケカ',ws:'ヴァイス',WS:'ヴァイス',dm:'デュエマ',DM:'デュエマ',mtg:'MTG',MTG:'MTG'};
+  const toNum = v => (typeof v==='number')?v:Number(String(v||'').replace(/[^\d.-]/g,'')||0);
+  const toSlug = s => (String(s||'').toLowerCase().trim().replace(/[^\w一-龥ぁ-んァ-ヶ]+/g,'-').replace(/^-+|-+$/g,''));
 
-  // 整形
-  const rows = raw.filter(r => (r.boxName||'').trim() !== '').map(r => {
-    const boxPrice = n(r.boxPrice);
-    const avgBuyTotal = n(r.avgBuyTotal);
-    const packCount = n(r.packCount) || 1;
-    const packEV = r.packEV ? n(r.packEV) : Math.round(avgBuyTotal / packCount);
-    const roi = r.roi ? Number(r.roi) : (boxPrice ? avgBuyTotal / boxPrice : 0);
-    const roi_pct = r.roi_pct || (roi ? (roi*100).toFixed(1)+'%' : '');
-    const slug = r.slug || toSlug(r.boxName);
-    const game = gameMap[r.game] || (r.game || '');
-    const affiliateImage = r.affiliateImage || `https://dummyimage.com/112x112/e5e7eb/111827.png&text=${encodeURIComponent((r.boxName||'TC').slice(0,2))}`;
-    return { ...r, slug, game, boxPrice, avgBuyTotal, packEV, roi, roi_pct, affiliateImage };
-  });
+  const data = rows.filter(r=>r && (r.boxName||r.boxname||r['ボックス名']))
+    .map(r=>{
+      const game = r.game||r['game']||'';
+      const packPrice = toNum(r.packPrice||r['packPrice']||r['パック単価']);
+      const packCount = toNum(r.packCount||r['packCount']||r['パック数']);
+      const boxPrice  = toNum(r.boxPrice||r['boxPrice']||r['箱価格']||packPrice*packCount);
 
-  // ランキング
-  const rankCols = [
+      const avgBuyTotal = toNum(r.avgBuyTotal||r['avgBuyTotal']||r['期待値合計']);
+      const packEV      = toNum(r.packEV||r['packEV']||r['1P_EV']|| (packCount? Math.round(avgBuyTotal/packCount):0));
+      const roi         = r.roi? Number(r.roi) : (boxPrice? (avgBuyTotal/boxPrice):0);
+      const roi_pct     = r.roi_pct || (roi? (roi*100).toFixed(1)+'%':'');
+
+      const boxName = r.boxName || r.boxname || r['ボックス名'] || '';
+      const slug    = r.slug || toSlug(boxName);
+
+      return {
+        game: gameMap[game] || game,
+        boxName,
+        slug,
+        releaseDate: r.releaseDate || r['releaseDate'] || r['発売日'] || '',
+        boxPrice, avgBuyTotal, packEV, roi, roi_pct,
+        affiliateImage: r.affiliateImage || r['affiliateImage'] || '',
+        affiliateUrl:   r.affiliateUrl   || r['affiliateUrl']   || ''
+      };
+    });
+
+  // PRリンク（任意差替）
+  document.getElementById('pr-rakuten').href = 'https://a.r10.to/hRBtGE';
+  document.getElementById('pr-amazon').href  = 'https://amzn.to/3XXXXXX';
+
+  // ランキング表
+  const rankCols=[
     { title:"商品", data:null, render:(_,__,row)=>{
-        const img = `<img src="${row.affiliateImage}" alt="${row.boxName}" class="thumb">`;
-        const link = `<a href="box.html?slug=${encodeURIComponent(row.slug)}" class="text-blue-700 underline">${row.boxName||'-'}</a>`;
-        const pr   = row.affiliateUrl ? `<a class="badge ml-2" href="${row.affiliateUrl}" target="_blank" rel="nofollow noopener sponsored">PR</a>`:'';
-        const sub  = `${row.game||''}${row.releaseDate?'｜'+row.releaseDate:''}`;
+        const img = row.affiliateImage ? `<img src="${row.affiliateImage}" alt="${row.boxName}" class="thumb">` : `<div class="thumb"></div>`;
+        const link=`<a href="box.html?slug=${encodeURIComponent(row.slug)}" class="text-blue-700 underline">${row.boxName||'-'}</a>`;
+        const pr  = row.affiliateUrl?`<a class="badge ml-2" href="${row.affiliateUrl}" target="_blank" rel="nofollow noopener sponsored">PR</a>`:'';
+        const sub = `${row.game||''}${row.releaseDate?'｜'+row.releaseDate:''}`;
         return `<div class="flex items-center gap-3">${img}<div><div class="font-medium">${link}${pr}</div><div class="text-xs text-gray-500">${sub}</div></div></div>`;
     }},
     { title:"発売", data:"releaseDate" },
@@ -138,27 +208,26 @@
     { title:"期待値合計(円)", data:"avgBuyTotal", render:v=>Number(v||0).toLocaleString() },
     { title:"1パック期待値", data:"packEV", render:v=>Number(v||0).toLocaleString() },
     { title:"回収率（％）", data:"roi_pct" },
-    { title:"_roi", data:"roi", visible:false }
+    { title:"roi_raw", data:"roi", visible:false }
   ];
   const rankingDT = $('#rankingTable').DataTable({
-    data: rows, columns: rankCols, order:[[6,'desc']], pageLength:10, autoWidth:false, scrollX:true,
+    data, columns:rankCols, order:[[6,'desc']], pageLength:10, autoWidth:false, scrollX:true,
     language:{ url:"//cdn.datatables.net/plug-ins/1.13.6/i18n/ja.json" }
   });
   function top3(){ $(rankingDT.rows().nodes()).removeClass('is-top'); rankingDT.rows({order:'applied'}).indexes().toArray().slice(0,3).forEach(i=>$(rankingDT.row(i).node()).addClass('is-top')); }
   rankingDT.on('draw', top3); top3();
 
-  // 全一覧（タブ）
-  const games = Array.from(new Set(rows.map(r => r.game).filter(Boolean)));
-  const tabs = document.getElementById('gameTabs');
-  function mkBtn(label){ const b=document.createElement('button'); b.className='px-3 py-1 rounded border text-sm bg-white'; b.textContent=label; b.onclick=()=>setFilter(label); return b; }
+  // 全トレカ一覧
+  const games = Array.from(new Set(data.map(d=>d.game).filter(Boolean)));
+  const tabs=document.getElementById('gameTabs');
+  function mkBtn(t){const b=document.createElement('button'); b.className='px-3 py-1 rounded border text-sm bg-white'; b.textContent=t; b.onclick=()=>setFilter(t); return b;}
   tabs.appendChild(mkBtn('すべて')); games.forEach(g=>tabs.appendChild(mkBtn(g)));
 
-  const allDT = $('#allTable').DataTable({
-    data: rows,
-    columns:[
+  const allDT=$('#allTable').DataTable({
+    data, columns:[
       { title:"ゲーム", data:"game" },
       { title:"商品", data:null, render:(_,__,row)=>{
-          const img=`<img src="${row.affiliateImage}" alt="${row.boxName}" class="thumb">`;
+          const img=row.affiliateImage?`<img src="${row.affiliateImage}" alt="${row.boxName}" class="thumb">`:`<div class="thumb"></div>`;
           const link=`<a href="box.html?slug=${encodeURIComponent(row.slug)}" class="text-blue-700 underline">${row.boxName||'-'}</a>`;
           const pr=row.affiliateUrl?`<a class="badge ml-2" href="${row.affiliateUrl}" target="_blank" rel="nofollow noopener sponsored">PR</a>`:'';
           return `<div class="flex items-center gap-3">${img}<div><div class="font-medium">${link}${pr}</div><div class="text-xs text-gray-500">${row.releaseDate||''}</div></div></div>`;
@@ -171,8 +240,58 @@
     order:[[0,'asc'],[5,'desc']], pageLength:10, autoWidth:false, scrollX:true,
     language:{ url:"//cdn.datatables.net/plug-ins/1.13.6/i18n/ja.json" }
   });
-  function setFilter(label){ if(label==='すべて'){ allDT.column(0).search('').draw(); } else { allDT.column(0).search('^'+label+'$', true, false).draw(); } }
+  function setFilter(label){ if(label==='すべて'){ allDT.column(0).search('').draw(); }else{ allDT.column(0).search('^'+label+'$',true,false).draw(); } }
   setFilter('すべて');
+
+  // 簡易計算
+  const rarityRows=document.getElementById('rarityRows'); let rarityCount=0;
+  function addRarity(avg=0, cpb=0){
+    if(rarityCount>=6)return;
+    rarityCount++;
+    const wrap=document.createElement('div'); wrap.className='border rounded p-3 bg-white';
+    wrap.innerHTML=`<div class="font-medium mb-2">レア${rarityCount}</div>
+      <label class="block text-sm">平均買取（円）<input type="number" class="r-avg border p-2 w-full mt-1 rounded" value="${avg}"></label>
+      <label class="block text-sm mt-2">封入数（枚）<input type="number" class="r-cpb border p-2 w-full mt-1 rounded" value="${cpb}"></label>
+      <button type="button" class="mt-2 text-xs text-red-600 underline remove">削除</button>`;
+    wrap.querySelector('.remove').addEventListener('click',()=>{ rarityRows.removeChild(wrap); rarityCount--; });
+    rarityRows.appendChild(wrap);
+  }
+  addRarity(900,3); addRarity(450,6);
+  document.getElementById('addRarity').onclick=()=>addRarity();
+
+  function calcNow(){
+    const n=v=> (v===''||v==null||isNaN(Number(v)))?0:Number(v);
+    const price=n(document.getElementById('c_packPrice').value);
+    const count=Math.max(1,n(document.getElementById('c_packCount').value));
+    const box=price*count;
+    let ev=0;
+    rarityRows.querySelectorAll('.border').forEach(boxEl=>{
+      ev += n(boxEl.querySelector('.r-avg').value) * n(boxEl.querySelector('.r-cpb').value);
+    });
+    const packEV=Math.round(ev/count);
+    const roi=box?ev/box:0, roiPct=(roi*100).toFixed(1)+'%';
+    document.getElementById('calcResult').textContent=`箱価格：${box.toLocaleString()}円 ／ 期待値合計：${ev.toLocaleString()}円 ／ 1パック期待値：${packEV.toLocaleString()}円 ／ 回収率：${roiPct}`;
+    return {boxPrice:box, ev, packEV, roi, roiPct};
+  }
+  document.getElementById('calcBtn').onclick=calcNow;
+
+  const STORAGE_KEY='toreka_calc_history_v1';
+  const hisDT=$('#historyTable').DataTable({
+    data:[], columns:[
+      { title:"タイトル", data:"title" },
+      { title:"箱価格", data:"boxPrice", render:v=>Number(v||0).toLocaleString() },
+      { title:"期待値合計", data:"ev", render:v=>Number(v||0).toLocaleString() },
+      { title:"1パック期待値", data:"packEV", render:v=>Number(v||0).toLocaleString() },
+      { title:"回収率（％）", data:"roiPct" },
+      { title:"保存日時", data:"savedAt" }
+    ],
+    pageLength:5, autoWidth:false, scrollX:true,
+    language:{ url:"//cdn.datatables.net/plug-ins/1.13.6/i18n/ja.json" }
+  });
+  function loadHistory(){ try{ const arr=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); hisDT.clear().rows.add(arr).draw(); }catch{} }
+  loadHistory();
+  document.getElementById('saveCalc').onclick=()=>{ const title=(document.getElementById('c_title').value||'未タイトル').trim(); const now=calcNow(); const rec={ title, boxPrice:now.boxPrice, ev:now.ev, packEV:now.packEV, roi:now.roi, roiPct:now.roiPct, savedAt:new Date().toLocaleString() }; const arr=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); arr.unshift(rec); localStorage.setItem(STORAGE_KEY, JSON.stringify(arr.slice(0,100))); loadHistory(); alert('保存しました（この端末に保存）'); };
+
 })();
 </script>
 </body>
